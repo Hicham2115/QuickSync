@@ -30,7 +30,7 @@ const FEATURES: Feature[] = [
   },
   {
     icon: Building2,
-    title: "Départements & organigramme",
+    title: "Départements Et organigramme",
     desc: "Structure hiérarchique claire, affectations par département, vision globale de l'organisation.",
   },
   {

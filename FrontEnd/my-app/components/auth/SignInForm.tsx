@@ -3,6 +3,11 @@ import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { api } from "@/lib/axios";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const schema = z.object({
   email: z
@@ -12,10 +17,12 @@ const schema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-const zodValidator = (fieldSchema) => ({ value }) => {
-  const result = fieldSchema.safeParse(value);
-  return result.success ? undefined : result.error.issues[0].message;
-};
+const zodValidator =
+  (fieldSchema: z.ZodTypeAny) =>
+  ({ value }: { value: unknown }) => {
+    const result = fieldSchema.safeParse(value);
+    return result.success ? undefined : result.error.issues[0].message;
+  };
 
 const inputClass =
   "w-full h-11 rounded-xl text-sm font-sans text-white placeholder-white/30 outline-none transition-all duration-200 focus:ring-1 focus:ring-gold-400/40";
@@ -24,18 +31,34 @@ const inputStyle = {
   border: "1px solid rgba(255,255,255,0.10)",
 };
 
-export function SignInForm({ onSwitch }) {
+export function SignInForm({ onSwitch }: { onSwitch: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+
+  const loginMutation = useMutation({
+    mutationFn: async (values: { email: string; password: string }) => {
+      const res = await api.post("/api/login", values);
+      return res.data;
+    },
+
+    onSuccess: (data) => {
+      localStorage.setItem("auth_token", data.token);
+      toast.success(`Bon retour, ${data.user.CompleteName} !`);
+      router.push("/dashboard");
+    },
+
+    onError: (error) => {
+      const message = axios.isAxiosError(error)
+        ? (error.response?.data?.message ?? "Invalid credentials.")
+        : "Failed to sign in.";
+      toast.error(message);
+    },
+  });
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
     onSubmit: async ({ value }) => {
-      const result = schema.safeParse(value);
-      if (!result.success) {
-        console.log(result.error.flatten().fieldErrors);
-        return;
-      }
-      console.log("SIGN IN", result.data);
+      loginMutation.mutate(value);
     },
   });
 
@@ -146,13 +169,14 @@ export function SignInForm({ onSwitch }) {
       {/* Submit */}
       <button
         type="submit"
-        className="w-full h-11 rounded-xl text-sm font-bold font-sans text-ink-900 flex items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-px active:translate-y-0"
+        disabled={loginMutation.isPending}
+        className="w-full h-11 rounded-xl text-sm font-bold font-sans text-ink-900 flex items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-px active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         style={{
           background: "linear-gradient(140deg, #CBA24A, #947024)",
           boxShadow: "0 8px 24px rgba(180,134,47,0.36)",
         }}
       >
-        Se connecter
+        {loginMutation.isPending ? "Connexion..." : "Se connecter"}
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </button>
 

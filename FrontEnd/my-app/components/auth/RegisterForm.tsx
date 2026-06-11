@@ -3,6 +3,10 @@ import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { api } from "@/lib/axios";
+import axios from "axios";
 
 const baseSchema = z.object({
   CompleteName: z
@@ -31,10 +35,12 @@ const schema = baseSchema.refine(
   { message: "Passwords do not match", path: ["confirmPassword"] },
 );
 
-const zodValidator = (fieldSchema) => ({ value }) => {
-  const result = fieldSchema.safeParse(value);
-  return result.success ? undefined : result.error.issues[0].message;
-};
+const zodValidator =
+  (fieldSchema: z.ZodTypeAny) =>
+  ({ value }: { value: unknown }) => {
+    const result = fieldSchema.safeParse(value);
+    return result.success ? undefined : result.error.issues[0].message;
+  };
 
 const inputClass =
   "w-full h-11 rounded-xl text-sm font-sans text-white placeholder-white/30 outline-none transition-all duration-200 focus:ring-1 focus:ring-gold-400/40";
@@ -43,9 +49,39 @@ const inputStyle = {
   border: "1px solid rgba(255,255,255,0.10)",
 };
 
-export function RegisterForm({ onSwitch }) {
+export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const signupMutation = useMutation({
+    mutationFn: async (values: {
+      email: string;
+      password: string;
+      CompleteName: string;
+      confirmPassword: string;
+    }) => {
+      const res = await api.post("/api/signup", {
+        CompleteName: values.CompleteName,
+        email: values.email,
+        password: values.password,
+        password_confirmation: values.confirmPassword,
+      });
+      return res.data;
+    },
+
+    onSuccess: (data) => {
+      console.log("User created:", data);
+      toast.success("Account created successfully! Please sign in.");
+      onSwitch();
+    },
+
+    onError: (error) => {
+      const message = axios.isAxiosError(error)
+        ? (error.response?.data?.message ?? "Failed to create account.")
+        : "Failed to create account.";
+      toast.error(message);
+    },
+  });
 
   const form = useForm({
     defaultValues: {
@@ -55,12 +91,8 @@ export function RegisterForm({ onSwitch }) {
       confirmPassword: "",
     },
     onSubmit: async ({ value }) => {
-      const result = schema.safeParse(value);
-      if (!result.success) {
-        console.log(result.error.flatten().fieldErrors);
-        return;
-      }
-      console.log("REGISTER", result.data);
+      console.log("Submitting form with values:", value);
+      signupMutation.mutate(value);
     },
   });
 
