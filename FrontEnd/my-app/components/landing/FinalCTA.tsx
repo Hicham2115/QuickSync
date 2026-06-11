@@ -45,7 +45,7 @@ export function FinalCTA() {
                 boxShadow: "0 8px 24px rgba(180,134,47,.38)",
               }}
               onClick={openSignUp}
-            >
+            > 
               Créer mon compte gratuitement
               <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </button>
