@@ -5,10 +5,11 @@ interface AppState {
   toggleMenu: () => void;
   closeMenu: () => void;
   isAuthOpen: boolean;
-  authMode: "signup" | "signin";
+  authMode: "signup" | "signin" | "reset";
   openSignUp: () => void;
   openSignIn: () => void;
   closeAuth: () => void;
+  ResetPassword: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -20,4 +21,5 @@ export const useAppStore = create<AppState>((set) => ({
   openSignUp: () => set({ isAuthOpen: true, authMode: "signup" }),
   openSignIn: () => set({ isAuthOpen: true, authMode: "signin" }),
   closeAuth: () => set({ isAuthOpen: false }),
+  ResetPassword: () => set({ isAuthOpen: true, authMode: "reset" }),
 }));

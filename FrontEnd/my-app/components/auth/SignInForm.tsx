@@ -31,7 +31,7 @@ const inputStyle = {
   border: "1px solid rgba(255,255,255,0.10)",
 };
 
-export function SignInForm({ onSwitch }: { onSwitch: () => void }) {
+export function SignInForm({ onSwitch , ResetPassword}: { onSwitch: () => void; ResetPassword: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
@@ -150,6 +150,7 @@ export function SignInForm({ onSwitch }: { onSwitch: () => void }) {
       {/* Forgot password */}
       <div className="flex justify-end -mt-0.5">
         <button
+          onClick={ResetPassword}
           type="button"
           className="text-xs font-sans text-gold-400/65 hover:text-gold-300 transition-colors duration-150"
         >

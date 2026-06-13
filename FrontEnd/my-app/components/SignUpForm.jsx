@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { LogoMark } from "./landing/LogoMark";
 import { RegisterForm } from "./auth/RegisterForm";
 import { SignInForm } from "./auth/SignInForm";
+import ResetPassword from "./auth/ResetPassword";
 
 export default function SignUpForm({ onClose, initialMode = "signup" }) {
   const [mode, setMode] = useState(initialMode);
@@ -21,13 +22,31 @@ export default function SignUpForm({ onClose, initialMode = "signup" }) {
     gsap.fromTo(
       cardRef.current,
       { opacity: 0, scale: 0.93, y: 28 },
-      { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(1.5)", delay: 0.06 },
+      {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: 0.45,
+        ease: "back.out(1.5)",
+        delay: 0.06,
+      },
     );
   }, []);
 
   const handleClose = () => {
-    gsap.to(cardRef.current, { opacity: 0, scale: 0.94, y: 16, duration: 0.22, ease: "power2.in" });
-    gsap.to(overlayRef.current, { opacity: 0, duration: 0.28, ease: "power2.in", onComplete: onClose });
+    gsap.to(cardRef.current, {
+      opacity: 0,
+      scale: 0.94,
+      y: 16,
+      duration: 0.22,
+      ease: "power2.in",
+    });
+    gsap.to(overlayRef.current, {
+      opacity: 0,
+      duration: 0.28,
+      ease: "power2.in",
+      onComplete: onClose,
+    });
   };
 
   const handleBackdrop = (e) => {
@@ -52,8 +71,18 @@ export default function SignUpForm({ onClose, initialMode = "signup" }) {
   };
 
   const titles = {
-    signup: { heading: "Créer un compte", sub: "Commencez gratuitement — aucune carte requise." },
-    signin: { heading: "Bon retour parmi nous", sub: "Connectez-vous à votre espace WorkSync." },
+    signup: {
+      heading: "Créer un compte",
+      sub: "Commencez gratuitement — aucune carte requise.",
+    },
+    signin: {
+      heading: "Bon retour parmi nous",
+      sub: "Connectez-vous à votre espace WorkSync.",
+    },
+    reset: {
+      heading: "Mot de passe oublié",
+      sub: "Entrez votre e-mail pour recevoir un lien de réinitialisation.",
+    },
   };
 
   return (
@@ -69,24 +98,29 @@ export default function SignUpForm({ onClose, initialMode = "signup" }) {
         style={{
           background: "linear-gradient(160deg, #131B2C 0%, #0F1729 100%)",
           border: "1px solid rgba(255,255,255,0.09)",
-          boxShadow: "0 32px 80px rgba(8,12,22,0.70), 0 8px 24px rgba(180,134,47,0.10)",
+          boxShadow:
+            "0 32px 80px rgba(8,12,22,0.70), 0 8px 24px rgba(180,134,47,0.10)",
         }}
       >
         {/* Dot grid */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)",
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)",
             backgroundSize: "24px 24px",
-            maskImage: "radial-gradient(ellipse at top, black 0%, transparent 68%)",
-            WebkitMaskImage: "radial-gradient(ellipse at top, black 0%, transparent 68%)",
+            maskImage:
+              "radial-gradient(ellipse at top, black 0%, transparent 68%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse at top, black 0%, transparent 68%)",
           }}
         />
         {/* Gold glow */}
         <div
           className="absolute top-0 right-0 w-2/3 h-48 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 80% 0%, rgba(203,162,74,0.16) 0%, transparent 58%)",
+            background:
+              "radial-gradient(ellipse at 80% 0%, rgba(203,162,74,0.16) 0%, transparent 58%)",
           }}
         />
 
@@ -118,9 +152,14 @@ export default function SignUpForm({ onClose, initialMode = "signup" }) {
         {/* Form — swaps based on mode */}
         {mode === "signup" ? (
           <RegisterForm onSwitch={() => switchMode("signin")} />
-        ) : (
-          <SignInForm onSwitch={() => switchMode("signup")} />
-        )}
+        ) : mode === "signin" ? (
+          <SignInForm
+            onSwitch={() => switchMode("signup")}
+            ResetPassword={() => switchMode("reset")}
+          />
+        ) : mode === "reset" ? (
+          <ResetPassword onSwitch={() => switchMode("signin")} />
+        ) : null}
       </div>
     </div>
   );
