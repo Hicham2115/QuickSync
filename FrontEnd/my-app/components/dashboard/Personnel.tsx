@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   UserPlus,
@@ -17,6 +17,12 @@ import { EmpAvatar } from "./shared/EmpAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { AddEmployeeModal } from "./AddEmployeeModal";
+import { EditEmployeeModal } from "./EditEmployeeModal";
+import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { Pencil, Trash2 } from "lucide-react";
+import { AureaPagination } from "@/components/ui/AureaPagination";
+
+const PAGE_SIZE = 10;
 
 type SortKey = keyof Pick<
   Employee,
@@ -35,8 +41,11 @@ export function Personnel() {
   const [status, setStatus] = useState("");
   const [view, setView] = useState<"table" | "cards">("table");
   const [modalOpen, setModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Employee | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null);
   const [sortCol, setSortCol] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [page, setPage] = useState(1);
 
   const {
     data: employees = [],
@@ -89,6 +98,11 @@ export function Personnel() {
     return r;
   }, [employees, search, dept, status, sortCol, sortDir]);
 
+  useEffect(() => { setPage(1); }, [search, dept, status, sortCol, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   if (isError)
     return (
       <div className="p-7 flex items-center justify-center h-64">
@@ -125,7 +139,7 @@ export function Personnel() {
       {/* Toolbar */}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         {/* Search — full width on mobile */}
-        <div className="flex items-center gap-2 px-3 border border-warm-300 bg-white rounded-lg h-9.5 w-full sm:w-65 shrink-0">
+        <div className="flex items-center gap-2 px-3 border border-warm-300 bg-white rounded-md h-9.5 w-full sm:w-65 shrink-0">
           <Search
             size={14}
             className="text-warm-400 shrink-0"
@@ -171,7 +185,7 @@ export function Personnel() {
               <button
                 key={v}
                 onClick={() => setView(v)}
-                className="w-9 h-9 rounded-lg border border-warm-200 flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-md border border-warm-200 flex items-center justify-center cursor-pointer transition-colors"
                 style={{ background: view === v ? "#EEF2F9" : "#fff" }}
               >
                 <Icon
@@ -187,7 +201,7 @@ export function Personnel() {
 
       {view === "table" ? (
         <div
-          className="bg-white border border-warm-200 rounded-2xl overflow-hidden"
+          className="bg-white border border-warm-200 rounded-md overflow-hidden"
           style={{ boxShadow: "0 1px 2px rgba(15,23,41,.06)" }}
         >
           {/* Table header */}
@@ -195,16 +209,13 @@ export function Personnel() {
             className="px-4 sm:px-5 py-3 bg-warm-50"
             style={{ borderBottom: "1px solid #DEDED8" }}
           >
-            <div className="grid grid-cols-[1fr_auto] md:grid-cols-[2fr_1fr_auto] lg:grid-cols-[2.5fr_1fr_1.2fr_1fr_1fr] gap-2 items-center">
+            <div className="grid grid-cols-[1fr_auto_auto] md:grid-cols-[2fr_1fr_auto_auto] lg:grid-cols-[2.5fr_1fr_1.2fr_1fr_1fr_auto] gap-2 items-center">
               {COLS.map(({ key, label }, idx) => {
                 const hideClass =
-                  idx === 1
-                    ? "hidden md:flex"
-                    : idx === 2
-                      ? "hidden lg:flex"
-                      : idx === 3
-                        ? "hidden lg:flex"
-                        : "flex";
+                  idx === 1 ? "hidden md:flex"
+                  : idx === 2 ? "hidden lg:flex"
+                  : idx === 3 ? "hidden lg:flex"
+                  : "flex";
                 const centerClass = idx > 0 ? "justify-center" : "";
                 return (
                   <button
@@ -214,17 +225,14 @@ export function Personnel() {
                   >
                     {label}
                     {sortCol === key ? (
-                      sortDir === "asc" ? (
-                        <ChevronUp size={12} />
-                      ) : (
-                        <ChevronDown size={12} />
-                      )
+                      sortDir === "asc" ? <ChevronUp size={12} /> : <ChevronDown size={12} />
                     ) : (
                       <span className="w-3 inline-block" />
                     )}
                   </button>
                 );
               })}
+              <span className="font-mono text-[9.5px] uppercase tracking-widest text-warm-500 flex justify-end pr-1">ACTIONS</span>
             </div>
           </div>
 
@@ -255,16 +263,16 @@ export function Personnel() {
               </p>
             </div>
           ) : (
-            filtered.map((emp, i) => (
+            paginated.map((emp, i) => (
               <div
                 key={emp.id}
                 className="px-4 sm:px-5 py-3.5 transition-colors hover:bg-warm-50 cursor-pointer"
                 style={{
                   borderBottom:
-                    i < filtered.length - 1 ? "1px solid #DEDED8" : "none",
+                    i < paginated.length - 1 ? "1px solid #DEDED8" : "none",
                 }}
               >
-                <div className="grid grid-cols-[1fr_auto] md:grid-cols-[2fr_1fr_auto] lg:grid-cols-[2.5fr_1fr_1.2fr_1fr_1fr] gap-2 items-center">
+                <div className="grid grid-cols-[1fr_auto_auto] md:grid-cols-[2fr_1fr_auto_auto] lg:grid-cols-[2.5fr_1fr_1.2fr_1fr_1fr_auto] gap-2 items-center">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <EmpAvatar name={emp.name} size={34} />
                     <div className="min-w-0">
@@ -288,6 +296,22 @@ export function Personnel() {
                   <div className="flex justify-center">
                     <StatusBadge status={emp.status} />
                   </div>
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditTarget(emp); }}
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-warm-400 hover:text-ink-700 hover:bg-warm-100 transition-colors cursor-pointer"
+                      title="Modifier"
+                    >
+                      <Pencil size={13} aria-hidden="true" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget(emp); }}
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-warm-400 hover:text-[#B4453A] hover:bg-[#F8E5E2] transition-colors cursor-pointer"
+                      title="Supprimer"
+                    >
+                      <Trash2 size={13} aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -295,20 +319,24 @@ export function Personnel() {
 
           {/* Footer */}
           <div
-            className="px-4 sm:px-5 py-3 flex items-center justify-between bg-warm-50"
+            className="px-4 sm:px-5 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-warm-50"
             style={{ borderTop: "1px solid #DEDED8" }}
           >
             <span className="font-sans text-[12px] text-warm-500">
-              Affichage {filtered.length} sur {employees.length}
+              {filtered.length === 0
+                ? "Aucun résultat"
+                : `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, filtered.length)} sur ${filtered.length}`}
             </span>
+            <AureaPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         </div>
       ) : (
+        <div className="flex flex-col gap-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((emp) => (
+          {paginated.map((emp) => (
             <div
               key={emp.id}
-              className="bg-white border border-warm-200 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+              className="bg-white border border-warm-200 rounded-md overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
               style={{ boxShadow: "0 1px 2px rgba(15,23,41,.06)" }}
             >
               <div
@@ -353,13 +381,38 @@ export function Personnel() {
                     </p>
                   </div>
                 </div>
+                <div className="flex gap-1.5 mt-3 pt-3 border-t border-warm-200">
+                  <button
+                    onClick={() => setEditTarget(emp)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border border-warm-200 bg-warm-50 font-sans text-[12px] font-medium text-ink-700 hover:bg-warm-100 transition-colors cursor-pointer"
+                  >
+                    <Pencil size={12} aria-hidden="true" /> Modifier
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(emp)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border border-[#F8E5E2] bg-[#FDF3F2] font-sans text-[12px] font-medium text-[#B4453A] hover:bg-[#F8E5E2] transition-colors cursor-pointer"
+                  >
+                    <Trash2 size={12} aria-hidden="true" /> Supprimer
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <span className="font-sans text-[12px] text-warm-500">
+            {filtered.length === 0
+              ? "Aucun résultat"
+              : `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, filtered.length)} sur ${filtered.length}`}
+          </span>
+          <AureaPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        </div>
+        </div>
       )}
 
       <AddEmployeeModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <EditEmployeeModal employee={editTarget} onClose={() => setEditTarget(null)} />
+      <DeleteConfirmModal employee={deleteTarget} onClose={() => setDeleteTarget(null)} />
     </div>
   );
 }

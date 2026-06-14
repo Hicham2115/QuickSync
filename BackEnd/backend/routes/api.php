@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\LeaveController;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
@@ -14,6 +15,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/employees',         [EmployeeController::class, 'store']);
     Route::put('/employees/{employee}',    [EmployeeController::class, 'update']);
     Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy']);
+
+    Route::get('/leaves',             [LeaveController::class, 'index']);
+    Route::post('/leaves',            [LeaveController::class, 'store']);
+    Route::patch('/leaves/{leave}/status', [LeaveController::class, 'updateStatus']);
+    Route::put('/leaves/{leave}',     [LeaveController::class, 'update']);
+    Route::delete('/leaves/{leave}',  [LeaveController::class, 'destroy']);
 });
 
 Route::middleware('throttle:10,1')->group(function () {

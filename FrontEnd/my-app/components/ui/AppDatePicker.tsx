@@ -42,7 +42,7 @@ export function AppDatePicker({
           type="button"
           disabled={disabled}
           className={[
-            "h-11 w-full px-4 rounded-lg border font-sans text-[14px] text-left",
+            "h-11 w-full px-4 rounded-md border font-sans text-[14px] text-left",
             "flex items-center gap-2.5 outline-none transition-colors bg-white",
             "cursor-pointer appearance-none",
             error
@@ -67,7 +67,7 @@ export function AppDatePicker({
         className="w-auto p-0 border-0 shadow-none bg-transparent"
       >
         <div
-          className="rounded-xl overflow-hidden"
+          className="rounded-md overflow-hidden"
           style={{
             border: "1px solid #DEDED8",
             boxShadow: "0 8px 24px rgba(15,23,41,.12), 0 2px 6px rgba(15,23,41,.08)",

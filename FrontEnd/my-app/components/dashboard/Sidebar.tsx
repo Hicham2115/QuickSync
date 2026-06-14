@@ -92,7 +92,7 @@ export function Sidebar() {
             className="font-display text-[18px] font-semibold leading-none"
             style={{ color: "#0F1729" }}
           >
-            Q
+            W
           </span>
         </div>
         <span

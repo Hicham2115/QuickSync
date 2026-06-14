@@ -32,7 +32,7 @@ export function AppSelect({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         className={[
-          "w-full h-9.5 px-3 pr-8 rounded-lg border font-sans text-[13px] outline-none transition-colors bg-white appearance-none cursor-pointer",
+          "w-full h-9.5 px-3 pr-8 rounded-md border font-sans text-[13px] outline-none transition-colors bg-white appearance-none cursor-pointer",
           error
             ? "border-[#B4453A] focus:border-[#B4453A]"
             : "border-warm-300 focus:border-ink-400",
