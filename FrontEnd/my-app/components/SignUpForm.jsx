@@ -77,7 +77,7 @@ export default function SignUpForm({ onClose, initialMode = "signup" }) {
     },
     signin: {
       heading: "Bon retour parmi nous",
-      sub: "Connectez-vous à votre espace WorkSync.",
+      sub: "Connectez-vous à votre espace QuickSync.",
     },
     reset: {
       heading: "Mot de passe oublié",
@@ -137,7 +137,7 @@ export default function SignUpForm({ onClose, initialMode = "signup" }) {
           <div className="flex items-center gap-2 mb-6">
             <LogoMark size={32} />
             <span className="font-display text-lg font-semibold tracking-tight text-white">
-              WorkSync
+              QuickSync
             </span>
           </div>
 

@@ -26,7 +26,7 @@ const REVIEWS = [
     date: "il y a 2 mois",
     rating: 5,
     quote:
-      "Depuis WorkSync, le traitement des congés est passé de 3 jours à 3 minutes. L'interface est un plaisir à utiliser au quotidien.",
+      "Depuis QuickSync, le traitement des congés est passé de 3 jours à 3 minutes. L'interface est un plaisir à utiliser au quotidien.",
   },
   {
     name: "Karim El Idrissi",

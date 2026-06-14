@@ -67,4 +67,11 @@ class LoginController extends Controller
 
         return response()->json(['message' => 'Mot de passe réinitialisé avec succès.']);
     }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Déconnexion réussie.']);
+    }
 }

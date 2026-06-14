@@ -4,7 +4,7 @@ import { FadeIn } from "./FadeIn";
 
 const FAQS = [
   {
-    q: "WorkSync convient-il aux petites entreprises ?",
+    q: "QuickSync convient-il aux petites entreprises ?",
     a: "Absolument. Le plan Starter est gratuit jusqu'à 10 employés et couvre toutes les fonctionnalités essentielles — gestion des congés, fiches employés et rapports basiques.",
   },
   {

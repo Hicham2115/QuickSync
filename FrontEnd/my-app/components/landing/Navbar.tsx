@@ -48,7 +48,7 @@ export function Navbar() {
             scrolled ? "text-ink-900" : "text-white"
           }`}
         >
-          WorkSync
+          QuickSync
         </span>
       </a>
 

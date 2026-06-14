@@ -208,7 +208,7 @@ export function DashboardPreview() {
                               </span>
                             </div>
                             <span className="font-display text-sm font-medium text-warm-25">
-                              WorkSync
+                              QuickSync
                             </span>
                           </div>
                           <div className="p-2.5 flex-1">

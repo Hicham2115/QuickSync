@@ -35,7 +35,7 @@ export function FinalCTA() {
               Prêt à Transformer Votre Gestion RH&nbsp;?
             </h2>
             <p className="relative font-sans text-base text-white/60 leading-[1.65] max-w-105 mx-auto mb-9">
-              Rejoignez les entreprises qui font confiance à WorkSync pour gérer
+              Rejoignez les entreprises qui font confiance à QuickSync pour gérer
               leurs talents.
             </p>
             <button

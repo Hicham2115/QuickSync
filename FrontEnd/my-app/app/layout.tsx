@@ -23,11 +23,11 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Aurea HR", template: "%s | Aurea HR" },
+  title: { default: "QuickSync", template: "%s | QuickSync" },
   description: "La plateforme RH moderne pour gérer vos talents avec élégance et précision.",
   openGraph: {
     type: "website",
-    title: "Aurea HR — Gérez vos talents avec élégance",
+    title: "QuickSync — Gérez vos talents avec élégance",
     description: "Une plateforme intuitive pour le suivi du personnel, la gestion des congés et l'analyse RH.",
   },
 };

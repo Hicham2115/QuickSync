@@ -113,7 +113,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
           className="font-display font-semibold text-white tracking-tight"
           style={{ fontSize: 26, letterSpacing: "-0.02em" }}
         >
-          WorkSync
+          QuickSync
         </span>
       </div>
 

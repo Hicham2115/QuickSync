@@ -25,7 +25,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2.5 mb-4">
               <LogoMark size={28} />
-              <span className="font-display text-base font-medium text-ink-900">WorkSync</span>
+              <span className="font-display text-base font-medium text-ink-900">QuickSync</span>
             </div>
             <p className="font-sans text-[13px] text-warm-500 leading-[1.7] max-w-55 mb-5">
               La plateforme RH moderne pour les équipes ambitieuses.
@@ -56,7 +56,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-warm-100 pt-6 flex items-center justify-between flex-wrap gap-3">
-          <span className="font-mono text-[11px] text-warm-400">© 2026 WorkSync. Tous droits réservés.</span>
+          <span className="font-mono text-[11px] text-warm-400">© 2026 QuickSync. Tous droits réservés.</span>
           <div className="flex gap-6 flex-wrap">
             {["Confidentialité", "Conditions", "Cookies"].map((l) => (
               <a key={l} href="#" className="font-sans text-[12px] text-warm-400 underline underline-offset-2 hover:text-ink-900 transition-colors duration-200">
