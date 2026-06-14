@@ -10,7 +10,7 @@ import { EmpAvatar } from './shared/EmpAvatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AureaPagination } from '@/components/ui/AureaPagination';
 import { AddLeaveModal } from './AddLeaveModal';
-import { DeleteLeaveModal } from './DeleteLeaveModal';
+import { DeleteModal } from './shared/DeleteModal';
 import type { Leave } from '@/lib/mock/hr-data';
 
 type TabKey = 'all' | 'en_attente' | 'approuve' | 'refuse';
@@ -39,6 +39,25 @@ export function Conges() {
         throw err;
       }
     },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await api.delete(`/api/leaves/${deleteTarget!.id}`);
+        return res.data;
+      } catch (err) {
+        if (axios.isAxiosError(err))
+          throw new Error(err.response?.data?.message ?? 'Erreur lors de la suppression.');
+        throw err;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leaves'] });
+      toast.success('Demande supprimée.');
+      setDeleteTarget(null);
+    },
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const statusMutation = useMutation({
@@ -331,7 +350,28 @@ export function Conges() {
       </div>
 
       <AddLeaveModal open={addOpen} onClose={() => setAddOpen(false)} />
-      <DeleteLeaveModal leave={deleteTarget} onClose={() => setDeleteTarget(null)} />
+      <DeleteModal
+        open={!!deleteTarget}
+        onClose={() => !deleteMutation.isPending && setDeleteTarget(null)}
+        title="Supprimer la demande"
+        description="Cette demande sera supprimée définitivement et ne pourra pas être récupérée."
+        confirmLabel="Supprimer"
+        isPending={deleteMutation.isPending}
+        onConfirm={() => deleteMutation.mutate()}
+        preview={
+          deleteTarget && (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center font-display text-[15px] font-semibold text-white" style={{ background: 'linear-gradient(140deg,#2C3E63,#1A253C)' }}>
+                {deleteTarget.employee.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <p className="font-sans text-[14px] font-semibold text-ink-900 leading-tight">{deleteTarget.employee}</p>
+                <p className="font-sans text-[12px] text-warm-500 mt-0.5">{deleteTarget.type} · {deleteTarget.from.slice(0, -5)} → {deleteTarget.to.slice(0, -5)}</p>
+              </div>
+            </div>
+          )
+        }
+      />
     </div>
   );
 }

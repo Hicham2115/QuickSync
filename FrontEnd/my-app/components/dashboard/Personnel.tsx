@@ -8,7 +8,8 @@ import {
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import axios from "axios";
 import type { Employee } from "@/lib/mock/hr-data";
@@ -18,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { EditEmployeeModal } from "./EditEmployeeModal";
-import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { DeleteModal } from "./shared/DeleteModal";
 import { Pencil, Trash2 } from "lucide-react";
 import { AureaPagination } from "@/components/ui/AureaPagination";
 
@@ -46,6 +47,26 @@ export function Personnel() {
   const [sortCol, setSortCol] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
+
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await api.delete(`/api/employees/${deleteTarget!.id}`);
+        return res.data;
+      } catch (err) {
+        if (axios.isAxiosError(err))
+          throw new Error(err.response?.data?.message ?? "Erreur lors de la suppression.");
+        throw err;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      toast.success(`${deleteTarget?.name} a été supprimé.`);
+      setDeleteTarget(null);
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
 
   const {
     data: employees = [],
@@ -412,7 +433,26 @@ export function Personnel() {
 
       <AddEmployeeModal open={modalOpen} onClose={() => setModalOpen(false)} />
       <EditEmployeeModal employee={editTarget} onClose={() => setEditTarget(null)} />
-      <DeleteConfirmModal employee={deleteTarget} onClose={() => setDeleteTarget(null)} />
+      <DeleteModal
+        open={!!deleteTarget}
+        onClose={() => !deleteMutation.isPending && setDeleteTarget(null)}
+        title="Supprimer l'employé"
+        description="Cet employé sera supprimé définitivement. Toutes les données associées seront perdues."
+        confirmLabel="Supprimer l'employé"
+        isPending={deleteMutation.isPending}
+        onConfirm={() => deleteMutation.mutate()}
+        preview={
+          deleteTarget && (
+            <div className="flex items-center gap-3">
+              <EmpAvatar name={deleteTarget.name} size={40} />
+              <div>
+                <p className="font-sans text-[14px] font-semibold text-ink-900 leading-tight">{deleteTarget.name}</p>
+                <p className="font-sans text-[12px] text-warm-500 mt-0.5">{deleteTarget.title} · {deleteTarget.dept}</p>
+              </div>
+            </div>
+          )
+        }
+      />
     </div>
   );
 }

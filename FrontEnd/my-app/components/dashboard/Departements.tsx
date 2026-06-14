@@ -1,14 +1,15 @@
 "use client";
 import { useState, useMemo, useEffect } from 'react';
 import { Plus, Building2, Pencil, Trash2, Search } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { api } from '@/lib/axios';
 import axios from 'axios';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AureaPagination } from '@/components/ui/AureaPagination';
 import { AddDepartmentModal } from './AddDepartmentModal';
 import { EditDepartmentModal } from './EditDepartmentModal';
-import { DeleteDepartmentModal } from './DeleteDepartmentModal';
+import { DeleteModal } from './shared/DeleteModal';
 import type { Department } from '@/lib/mock/hr-data';
 
 const PAGE_SIZE = 9;
@@ -19,6 +20,27 @@ export function Departements() {
   const [addOpen, setAddOpen]           = useState(false);
   const [editTarget, setEditTarget]     = useState<Department | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Department | null>(null);
+
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await api.delete(`/api/departments/${deleteTarget!.id}`);
+        return res.data;
+      } catch (err) {
+        if (axios.isAxiosError(err))
+          throw new Error(err.response?.data?.message ?? 'Erreur lors de la suppression.');
+        throw err;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      toast.success(`${deleteTarget?.name} a été supprimé.`);
+      setDeleteTarget(null);
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
 
   const { data: departments = [], isLoading, isError } = useQuery<Department[]>({
     queryKey: ['departments'],
@@ -173,7 +195,30 @@ export function Departements() {
 
       <AddDepartmentModal open={addOpen} onClose={() => setAddOpen(false)} />
       <EditDepartmentModal department={editTarget} onClose={() => setEditTarget(null)} />
-      <DeleteDepartmentModal department={deleteTarget} onClose={() => setDeleteTarget(null)} />
+      <DeleteModal
+        open={!!deleteTarget}
+        onClose={() => !deleteMutation.isPending && setDeleteTarget(null)}
+        title="Supprimer le département"
+        description="Ce département sera supprimé définitivement. Cette action est irréversible."
+        confirmLabel="Supprimer"
+        isPending={deleteMutation.isPending}
+        onConfirm={() => deleteMutation.mutate()}
+        preview={
+          deleteTarget && (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center" style={{ background: deleteTarget.color + '22' }}>
+                <span className="font-display text-[15px] font-bold" style={{ color: deleteTarget.color }}>
+                  {deleteTarget.name.slice(0, 2).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="font-sans text-[14px] font-semibold text-ink-900 leading-tight">{deleteTarget.name}</p>
+                <p className="font-sans text-[12px] text-warm-500 mt-0.5">Responsable : {deleteTarget.head}</p>
+              </div>
+            </div>
+          )
+        }
+      />
     </div>
   );
 }
