@@ -149,16 +149,17 @@ export function AddLeaveModal({ open, onClose }: Props) {
               </Field>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <Field label="Type de congé" error={errors.type} required>
-                <AppSelect
-                  value={form.type}
-                  onChange={(v) => set("type", v)}
-                  placeholder="Sélectionner"
-                  options={TYPE_OPTIONS}
-                  error={!!errors.type}
-                />
-              </Field>
+            <Field label="Type de congé" error={errors.type} required>
+              <AppSelect
+                value={form.type}
+                onChange={(v) => set("type", v)}
+                placeholder="Sélectionner"
+                options={TYPE_OPTIONS}
+                error={!!errors.type}
+              />
+            </Field>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Field label="Date de début" error={errors.from} required>
                 <AppDatePicker value={form.from} onChange={(v) => set("from", v)} error={!!errors.from} />
               </Field>
