@@ -24,6 +24,24 @@ class UserController extends Controller
         );
     }
 
+    public function update(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+        ]);
+
+        $user->CompleteName = $data['name'];
+        $user->email        = $data['email'];
+        $user->save();
+
+        return response()->json([
+            'id'    => $user->id,
+            'name'  => $user->CompleteName,
+            'email' => $user->email,
+        ]);
+    }
+
     public function updateRole(Request $request, User $user)
     {
         $data = $request->validate([

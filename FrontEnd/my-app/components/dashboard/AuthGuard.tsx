@@ -11,6 +11,7 @@ const RESTRICTED_PATHS: Record<string, UserRole[]> = {
   "/dashboard/personnel":    ["admin", "rh"],
   "/dashboard/departements": ["admin", "rh"],
   "/dashboard/rapports":     ["admin", "rh"],
+  // profile and presence are open to all roles — no entry needed
 };
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {

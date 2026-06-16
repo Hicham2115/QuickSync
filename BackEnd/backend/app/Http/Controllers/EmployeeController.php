@@ -20,6 +20,8 @@ class EmployeeController extends Controller
             'hired'  => $e->hired->format('d M Y'),
             'status' => $e->status,
             'leaves' => $e->leaves,
+            'phone'  => $e->phone ?? '',
+            'bio'    => $e->bio ?? '',
         ]);
 
         return response()->json($employees);
@@ -75,6 +77,8 @@ class EmployeeController extends Controller
             'hired'  => 'required|date',
             'status' => ['required', Rule::in(['Actif', 'En congé', 'Inactif'])],
             'leaves' => 'integer|min:0',
+            'phone'  => 'nullable|string|max:30',
+            'bio'    => 'nullable|string|max:500',
         ]);
 
         $employee->update($data);
@@ -88,6 +92,8 @@ class EmployeeController extends Controller
             'hired'  => $employee->hired->format('d M Y'),
             'status' => $employee->status,
             'leaves' => $employee->leaves,
+            'phone'  => $employee->phone ?? '',
+            'bio'    => $employee->bio ?? '',
         ]);
     }
 

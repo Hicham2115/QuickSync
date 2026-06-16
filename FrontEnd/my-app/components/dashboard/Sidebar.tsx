@@ -8,10 +8,11 @@ import {
   CalendarDays,
   Building2,
   BarChart3,
-  Settings,
   ChevronUp,
   LogOut,
   UsersRound,
+  ClipboardCheck,
+  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -39,6 +40,7 @@ const ALL_NAV_GROUPS: NavGroup[] = [
       { icon: LayoutDashboard, label: "Tableau de bord", href: "/dashboard",              roles: ["admin", "rh", "employee"] },
       { icon: Users,           label: "Personnel",       href: "/dashboard/personnel",    roles: ["admin", "rh"] },
       { icon: CalendarDays,    label: "Congés",          href: "/dashboard/conges",       roles: ["admin", "rh", "employee"] },
+      { icon: ClipboardCheck,  label: "Présence",        href: "/dashboard/presence",     roles: ["admin", "rh", "employee"] },
       { icon: Building2,       label: "Départements",    href: "/dashboard/departements", roles: ["admin", "rh"] },
     ],
   },
@@ -97,6 +99,30 @@ export function Sidebar() {
     .join("")
     .toUpperCase() ?? "–";
 
+  function SidebarBtn({
+    onClick,
+    children,
+    danger = false,
+  }: {
+    onClick: () => void;
+    children: React.ReactNode;
+    danger?: boolean;
+  }) {
+    return (
+      <button
+        onClick={onClick}
+        className="w-full flex items-center gap-2 px-3.5 py-2.5 text-left font-sans text-[13px] bg-transparent border-none cursor-pointer transition-colors"
+        style={{ color: danger ? "#B4453A" : "#fff" }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = danger ? "rgba(180,69,58,.1)" : "rgba(255,255,255,.07)";
+        }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+      >
+        {children}
+      </button>
+    );
+  }
+
   return (
     <aside className="w-64 flex flex-col h-screen shrink-0" style={{ background: "#131B2C" }}>
       {/* Logo */}
@@ -135,7 +161,7 @@ export function Sidebar() {
                 >
                   {active && (
                     <div
-                      className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-[3px]"
+                      className="absolute left-0 top-[20%] bottom-[20%] w-0.75 rounded-r-[3px]"
                       style={{ background: "#CBA24A" }}
                     />
                   )}
@@ -160,24 +186,13 @@ export function Sidebar() {
             className="absolute bottom-[calc(100%+4px)] left-3 right-3 rounded-[10px] overflow-hidden z-50"
             style={{ background: "#1A253C", border: "1px solid rgba(255,255,255,.1)", boxShadow: "0 8px 24px rgba(0,0,0,.35)" }}
           >
-            <button
-              onClick={() => { router.push("/dashboard/parametres"); setMenuOpen(false); }}
-              className="w-full flex items-center gap-2 px-3.5 py-2.5 text-left font-sans text-[13px] text-white bg-transparent border-none cursor-pointer"
-              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.07)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-            >
-              <Settings size={13} /> Paramètres
-            </button>
+            <SidebarBtn onClick={() => { router.push("/dashboard/profile"); setMenuOpen(false); }}>
+              <UserRound size={13} /> Mon profil
+            </SidebarBtn>
             <div style={{ height: 1, background: "rgba(255,255,255,.08)" }} />
-            <button
-              onClick={() => { logoutMutation.mutate(); setMenuOpen(false); }}
-              className="w-full flex items-center gap-2 px-3.5 py-2.5 text-left font-sans text-[13px] bg-transparent border-none cursor-pointer"
-              style={{ color: "#B4453A" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(180,69,58,.1)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-            >
+            <SidebarBtn danger onClick={() => { logoutMutation.mutate(); setMenuOpen(false); }}>
               <LogOut size={13} /> Se déconnecter
-            </button>
+            </SidebarBtn>
           </div>
         )}
         <button

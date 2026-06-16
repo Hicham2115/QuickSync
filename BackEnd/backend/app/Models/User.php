@@ -13,7 +13,7 @@ use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['CompleteName', 'email', 'password', 'role'])]
+#[Fillable(['CompleteName', 'email', 'password', 'role', 'avatar'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {

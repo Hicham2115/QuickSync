@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MeController;
+use App\Http\Controllers\AttendanceController;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
@@ -14,7 +17,21 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user',      fn (Request $request) => $request->user());
     Route::post('/admin/create-account',        [RegisterController::class, 'createAccount']);
+
+    Route::get('/dashboard/stats',   [DashboardController::class, 'stats']);
+    Route::get('/me/profile',       [MeController::class, 'profile']);
+    Route::patch('/me/profile',     [MeController::class, 'updateProfile']);
+    Route::post('/me/avatar',       [MeController::class, 'uploadAvatar']);
+    Route::get('/me/leaves',        [MeController::class, 'leaves']);
+    Route::post('/me/leaves',       [MeController::class, 'storeLeave']);
+    Route::get('/me/balance',       [MeController::class, 'balance']);
+    Route::get('/me/notifications', [MeController::class, 'notifications']);
+    Route::get('/me/team',          [MeController::class, 'teamCalendar']);
+    Route::post('/me/attendance',   [AttendanceController::class, 'checkIn']);
+    Route::get('/me/attendance',    [AttendanceController::class, 'myAttendance']);
+    Route::get('/attendance',       [AttendanceController::class, 'allAttendance']);
     Route::get('/admin/users',                  [UserController::class, 'index']);
+    Route::patch('/admin/users/{user}',         [UserController::class, 'update']);
     Route::patch('/admin/users/{user}/role',    [UserController::class, 'updateRole']);
     Route::delete('/admin/users/{user}',        [UserController::class, 'destroy']);
     Route::get('/employees',          [EmployeeController::class, 'index']);

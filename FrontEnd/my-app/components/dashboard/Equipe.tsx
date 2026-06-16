@@ -5,12 +5,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import axios from "axios";
-import { ShieldCheck, UserPlus, Trash2, CheckCircle, Clock, Search } from "lucide-react";
+import { ShieldCheck, UserPlus, Trash2, Search, Pencil, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { EmpAvatar } from "./shared/EmpAvatar";
 import { DeleteModal } from "./shared/DeleteModal";
 import { CreateAccountModal } from "./CreateAccountModal";
+import { useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Field, inputCls } from "@/components/dashboard/shared/ModalFormField";
 
 type Role = "rh" | "employee";
 
@@ -36,9 +39,156 @@ const ROLE_OPTIONS = [
   { value: "rh",       label: "RH" },
 ];
 
+// ── Edit account modal ──────────────────────────────────────────────────────
+interface EditForm { name: string; email: string }
+
+function EditAccountModal({
+  account,
+  onClose,
+}: {
+  account: Account | null;
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState<EditForm>({ name: "", email: "" });
+  const [errors, setErrors] = useState<Partial<EditForm>>({});
+
+  const open = !!account;
+
+  useEffect(() => {
+    if (account) {
+      setForm({ name: account.name, email: account.email });
+      setErrors({});
+    }
+  }, [account]);
+
+  const set = (field: keyof EditForm, value: string) =>
+    setForm((f) => ({ ...f, [field]: value }));
+
+  const validate = (): boolean => {
+    const e: Partial<EditForm> = {};
+    if (!form.name.trim())  e.name  = "Nom requis";
+    if (!form.email.trim()) e.email = "Email requis";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Email invalide";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const mutation = useMutation({
+    mutationFn: async (payload: EditForm) => {
+      try {
+        const res = await api.patch(`/api/admin/users/${account!.id}`, payload);
+        return res.data;
+      } catch (err) {
+        if (axios.isAxiosError(err))
+          throw new Error(err.response?.data?.message ?? "Erreur lors de la mise à jour.");
+        throw err;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("Compte mis à jour.");
+      onClose();
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const handleOpenChange = (v: boolean) => {
+    if (!v && !mutation.isPending) onClose();
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validate()) mutation.mutate(form);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        showCloseButton={false}
+        className="w-full max-w-[calc(100%-2rem)] sm:max-w-lg p-0 gap-0 overflow-hidden rounded-md border border-warm-200"
+        style={{ boxShadow: "0 24px 64px rgba(15,23,41,.16), 0 4px 12px rgba(15,23,41,.08)" }}
+      >
+        <DialogHeader
+          className="px-7 py-5 flex-row items-center justify-between space-y-0"
+          style={{ borderBottom: "1px solid #DEDED8", background: "#FAFAFA" }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-md flex items-center justify-center shrink-0"
+              style={{ background: "linear-gradient(140deg,#2C3E63,#1A253C)" }}
+            >
+              <Pencil size={15} style={{ color: "#fff" }} aria-hidden="true" />
+            </div>
+            <DialogTitle
+              className="font-display text-[19px] font-medium text-ink-900"
+              style={{ letterSpacing: "-0.01em" }}
+            >
+              Modifier le compte
+            </DialogTitle>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={mutation.isPending}
+            className="w-8 h-8 rounded-md flex items-center justify-center text-warm-400 hover:bg-warm-100 hover:text-ink-700 transition-colors cursor-pointer shrink-0 disabled:opacity-40"
+          >
+            <X size={15} aria-hidden="true" />
+          </button>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit}>
+          <div className="px-7 py-6 flex flex-col gap-5">
+            <Field label="Nom complet" error={errors.name} required>
+              <input
+                value={form.name}
+                onChange={(e) => set("name", e.target.value)}
+                placeholder="Nadia Benjelloun"
+                className={inputCls(!!errors.name)}
+              />
+            </Field>
+            <Field label="Adresse email" error={errors.email} required>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => set("email", e.target.value)}
+                placeholder="n.exemple@aurea.ma"
+                className={inputCls(!!errors.email)}
+              />
+            </Field>
+          </div>
+
+          <div
+            className="px-7 py-5 flex items-center justify-end gap-3"
+            style={{ borderTop: "1px solid #DEDED8", background: "#FAFAFA" }}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={mutation.isPending}
+              className="px-5 py-2.5 rounded-md border border-warm-200 bg-white font-sans text-[13px] font-medium text-ink-700 hover:bg-warm-50 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              disabled={mutation.isPending}
+              className="px-6 py-2.5 rounded-md font-sans text-[13px] font-bold border-none cursor-pointer disabled:opacity-60 transition-opacity"
+              style={{ background: "linear-gradient(140deg,#2C3E63,#1A253C)", color: "#fff", boxShadow: "0 2px 10px rgba(44,62,99,.28)" }}
+            >
+              {mutation.isPending ? "Enregistrement…" : "Enregistrer"}
+            </button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Main component ──────────────────────────────────────────────────────────
 export function Equipe() {
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Account | null>(null);
+  const [editTarget, setEditTarget] = useState<Account | null>(null);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
 
@@ -200,15 +350,14 @@ export function Equipe() {
       >
         {/* Table head */}
         <div
-          className="px-5 py-3 bg-warm-50 grid grid-cols-[1fr_auto_auto] md:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-3 items-center"
+          className="px-5 py-3 bg-warm-50 grid grid-cols-[1fr_auto_auto] md:grid-cols-[2fr_1fr_1fr_auto] gap-3 items-center"
           style={{ borderBottom: "1px solid #DEDED8" }}
         >
           {[
             { label: "COMPTE",   cls: "" },
             { label: "RÔLE",     cls: "hidden md:block text-center" },
-            { label: "STATUT",   cls: "hidden md:block text-center" },
             { label: "CRÉÉ LE",  cls: "hidden md:block text-center" },
-            { label: "",         cls: "text-right" },
+            { label: "ACTIONS",  cls: "text-right" },
           ].map(({ label, cls }, i) => (
             <span key={i} className={`font-mono text-[9.5px] uppercase tracking-widest text-warm-500 ${cls}`}>
               {label}
@@ -241,7 +390,7 @@ export function Equipe() {
             return (
               <div
                 key={account.id}
-                className="px-5 py-3.5 grid grid-cols-[1fr_auto_auto] md:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-3 items-center hover:bg-warm-50 transition-colors"
+                className="px-5 py-3.5 grid grid-cols-[1fr_auto_auto] md:grid-cols-[2fr_1fr_1fr_auto] gap-3 items-center hover:bg-warm-50 transition-colors"
                 style={{ borderBottom: i < filtered.length - 1 ? "1px solid #DEDED8" : "none" }}
               >
                 {/* Account identity */}
@@ -265,19 +414,6 @@ export function Equipe() {
                   />
                 </div>
 
-                {/* Verified badge */}
-                <div className="hidden md:flex justify-center">
-                  {account.verified ? (
-                    <span className="inline-flex items-center gap-1 font-sans text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-                      <CheckCircle size={11} aria-hidden="true" /> Vérifié
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 font-sans text-[11px] font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
-                      <Clock size={11} aria-hidden="true" /> En attente
-                    </span>
-                  )}
-                </div>
-
                 {/* Created at */}
                 <span className="font-mono text-[11px] text-warm-500 hidden md:block text-center">
                   {account.created_at}
@@ -291,8 +427,15 @@ export function Equipe() {
                   {meta.label}
                 </span>
 
-                {/* Delete */}
-                <div className="flex justify-end">
+                {/* Actions */}
+                <div className="flex items-center justify-end gap-1">
+                  <button
+                    onClick={() => setEditTarget(account)}
+                    className="w-7 h-7 rounded-md flex items-center justify-center text-warm-400 hover:text-ink-700 hover:bg-warm-100 transition-colors cursor-pointer"
+                    title="Modifier le compte"
+                  >
+                    <Pencil size={13} aria-hidden="true" />
+                  </button>
                   <button
                     onClick={() => setDeleteTarget(account)}
                     className="w-7 h-7 rounded-md flex items-center justify-center text-warm-400 hover:text-[#B4453A] hover:bg-[#F8E5E2] transition-colors cursor-pointer"
@@ -316,12 +459,11 @@ export function Equipe() {
               {filtered.length} compte{filtered.length !== 1 ? "s" : ""}
               {roleFilter ? ` · ${getRoleMeta(roleFilter).label}` : ""}
             </span>
-            <span className="font-sans text-[11px] text-warm-400">
-              {accounts.filter((a) => a.verified).length} vérifié{accounts.filter((a) => a.verified).length !== 1 ? "s" : ""} · {accounts.filter((a) => !a.verified).length} en attente
-            </span>
           </div>
         )}
       </div>
+
+      <EditAccountModal account={editTarget} onClose={() => setEditTarget(null)} />
 
       <CreateAccountModal
         open={createOpen}

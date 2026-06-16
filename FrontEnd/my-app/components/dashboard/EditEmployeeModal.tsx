@@ -31,6 +31,8 @@ interface EmployeeForm {
   hired: string; // ISO "YYYY-MM-DD"
   status: "Actif" | "En congé" | "Inactif";
   leaves: number;
+  phone: string;
+  bio: string;
 }
 
 function toIso(hired: string): string {
@@ -54,6 +56,8 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
         hired:  toIso(employee.hired),
         status: employee.status,
         leaves: employee.leaves,
+        phone:  employee.phone ?? "",
+        bio:    employee.bio ?? "",
       });
       setErrors({});
     }
@@ -142,7 +146,8 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          <div className="px-8 py-7 flex flex-col gap-6">
+          <div className="px-8 py-7 flex flex-col gap-6 max-h-[70vh] overflow-y-auto">
+            {/* Identity */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Field label="Nom complet" error={errors.name} required>
                 <input value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Nadia Benjelloun" className={inputCls(!!errors.name)} />
@@ -152,6 +157,7 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
               </Field>
             </div>
 
+            {/* Role */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Field label="Département" error={errors.dept} required>
                 <input value={form.dept} onChange={(e) => set("dept", e.target.value)} placeholder="Engineering" className={inputCls(!!errors.dept)} />
@@ -161,6 +167,7 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
               </Field>
             </div>
 
+            {/* Contract */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <Field label="Date d'embauche" error={errors.hired} required>
                 <AppDatePicker value={form.hired} onChange={(v) => set("hired", v)} error={!!errors.hired} />
@@ -180,6 +187,33 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
                 <NumInput value={form.leaves} onChange={(v) => set("leaves", v)} />
               </Field>
             </div>
+
+            {/* Contact */}
+            <div
+              className="rounded-md px-5 py-4 flex flex-col gap-4"
+              style={{ background: "#F7F7F5", border: "1px solid #DEDED8" }}
+            >
+              <p className="font-mono text-[9.5px] uppercase tracking-widest text-warm-500">
+                Informations de contact
+              </p>
+              <Field label="Téléphone" error={errors.phone}>
+                <input
+                  value={form.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                  placeholder="+212 6 00 00 00 00"
+                  className={inputCls(!!errors.phone)}
+                />
+              </Field>
+              <Field label="Bio / Notes">
+                <textarea
+                  value={form.bio}
+                  onChange={(e) => set("bio", e.target.value)}
+                  placeholder="Quelques mots sur cet employé…"
+                  rows={3}
+                  className={`${inputCls(false)} resize-none`}
+                />
+              </Field>
+            </div>
           </div>
 
           {/* Footer */}
@@ -196,4 +230,3 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
     </Dialog>
   );
 }
-

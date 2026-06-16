@@ -7,6 +7,8 @@ export interface Employee {
   hired: string;
   status: 'Actif' | 'En congé' | 'Inactif';
   leaves: number;
+  phone?: string;
+  bio?: string;
 }
 
 export interface Leave {

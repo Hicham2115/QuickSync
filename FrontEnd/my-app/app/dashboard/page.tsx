@@ -1,8 +1,10 @@
-import type { Metadata } from 'next';
-import { Overview } from '@/components/dashboard/Overview';
+"use client";
 
-export const metadata: Metadata = { title: 'Tableau de bord' };
+import { useAuthStore } from "@/lib/store/useAuthStore";
+import { Overview } from "@/components/dashboard/Overview";
+import { EmployeeDashboard } from "@/components/dashboard/EmployeeDashboard";
 
 export default function DashboardPage() {
-  return <Overview />;
+  const role = useAuthStore((s) => s.user?.role);
+  return role === "employee" ? <EmployeeDashboard /> : <Overview />;
 }

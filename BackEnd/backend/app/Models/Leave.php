@@ -15,6 +15,7 @@ class Leave extends Model
         'days',
         'status',
         'reason',
+        'attachment',
     ];
 
     protected $casts = [
