@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuthStore } from "@/lib/store/useAuthStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
@@ -15,7 +16,7 @@ import { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, inputCls } from "@/components/dashboard/shared/ModalFormField";
 
-type Role = "rh" | "employee";
+type Role = "rh" | "employee" | "admin";
 
 interface Account {
   id: number;
@@ -26,15 +27,22 @@ interface Account {
   created_at: string;
 }
 
-const ROLE_FALLBACK = { label: "Inconnu", bg: "#F5F4F2", color: "#76766C" };
 const ROLE_META: Record<string, { label: string; bg: string; color: string }> = {
-  rh:       { label: "RH",      bg: "#EDFAF3", color: "#2E7D5B" },
-  employee: { label: "Employé", bg: "#EEF2F9", color: "#2C3E63" },
+  admin:    { label: "Admin",   bg: "#FEF3E2", color: "#92400E" },
+  rh:       { label: "RH",     bg: "#EDFAF3", color: "#2E7D5B" },
+  employee: { label: "Employé",bg: "#EEF2F9", color: "#2C3E63" },
 };
-const getRoleMeta = (role: string) => ROLE_META[role] ?? ROLE_FALLBACK;
+const getRoleMeta = (role: string) => ROLE_META[role] ?? ROLE_META["employee"];
 
 const ROLE_OPTIONS = [
+  { value: "",         label: "Tous les rôles" }, // used only for filter
+  { value: "employee", label: "Employé" },
+  { value: "rh",       label: "RH" },
+];
+
+const ROLE_FILTER_OPTIONS = [
   { value: "",         label: "Tous les rôles" },
+  { value: "admin",    label: "Admin" },
   { value: "employee", label: "Employé" },
   { value: "rh",       label: "RH" },
 ];
@@ -186,6 +194,8 @@ function EditAccountModal({
 
 // ── Main component ──────────────────────────────────────────────────────────
 export function Equipe() {
+  const currentRole = useAuthStore((s) => s.user?.role);
+  const isAdmin = currentRole === "admin";
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Account | null>(null);
   const [editTarget, setEditTarget] = useState<Account | null>(null);
@@ -277,18 +287,20 @@ export function Equipe() {
             {isLoading ? "Chargement…" : `${accounts.length} compte${accounts.length !== 1 ? "s" : ""} · 3 rôles disponibles`}
           </p>
         </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="inline-flex items-center gap-2 px-4.5 py-2.5 rounded-md font-sans text-[13px] font-bold border-none cursor-pointer self-start"
-          style={{
-            background: "linear-gradient(140deg,#2C3E63,#1A253C)",
-            color: "#fff",
-            boxShadow: "0 2px 10px rgba(44,62,99,.28)",
-          }}
-        >
-          <UserPlus size={15} aria-hidden="true" />
-          Créer un compte
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="inline-flex items-center gap-2 px-4.5 py-2.5 rounded-md font-sans text-[13px] font-bold border-none cursor-pointer self-start"
+            style={{
+              background: "linear-gradient(140deg,#2C3E63,#1A253C)",
+              color: "#fff",
+              boxShadow: "0 2px 10px rgba(44,62,99,.28)",
+            }}
+          >
+            <UserPlus size={15} aria-hidden="true" />
+            Créer un compte
+          </button>
+        )}
       </div>
 
       {/* Role summary cards */}
@@ -339,7 +351,7 @@ export function Equipe() {
           className="w-44"
           value={roleFilter}
           onChange={setRoleFilter}
-          options={ROLE_OPTIONS}
+          options={ROLE_FILTER_OPTIONS}
         />
       </div>
 
@@ -404,14 +416,23 @@ export function Equipe() {
                   </div>
                 </div>
 
-                {/* Role selector */}
-                <div className="hidden md:block">
-                  <AppSelect
-                    className="w-36"
-                    value={account.role}
-                    onChange={(v) => roleMutation.mutate({ id: account.id, role: v as Role })}
-                    options={ROLE_OPTIONS}
-                  />
+                {/* Role selector — static badge for admin, dropdown for others */}
+                <div className="hidden md:flex justify-start">
+                  {account.role === "admin" ? (
+                    <span
+                      className="inline-flex items-center font-sans text-[11px] font-semibold px-3 py-1.5 rounded-md"
+                      style={{ background: meta.bg, color: meta.color }}
+                    >
+                      {meta.label}
+                    </span>
+                  ) : (
+                    <AppSelect
+                      className="w-36"
+                      value={account.role}
+                      onChange={(v) => roleMutation.mutate({ id: account.id, role: v as Role })}
+                      options={ROLE_OPTIONS.filter((o) => o.value !== "")}
+                    />
+                  )}
                 </div>
 
                 {/* Created at */}

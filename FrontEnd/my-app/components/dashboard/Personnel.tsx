@@ -25,6 +25,7 @@ import { CreateAccountModal } from "./CreateAccountModal";
 import { DeleteModal } from "./shared/DeleteModal";
 import { Pencil, Trash2 } from "lucide-react";
 import { AureaPagination } from "@/components/ui/AureaPagination";
+import { useAuthStore } from "@/lib/store/useAuthStore";
 
 const PAGE_SIZE = 10;
 
@@ -40,6 +41,8 @@ const COLS: { key: SortKey; label: string }[] = [
   { key: "status", label: "STATUT" },
 ];
 export function Personnel() {
+  const role = useAuthStore((s) => s.user?.role);
+  const isAdmin = role === "admin";
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState("");
   const [status, setStatus] = useState("");
@@ -147,14 +150,16 @@ export function Personnel() {
             : `${employees.length} collaborateur${employees.length !== 1 ? "s" : ""}`}
         </p>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <button
-            onClick={() => setCreateAccountOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md font-sans text-[13px] font-bold border border-warm-200 bg-white cursor-pointer text-ink-700 hover:bg-warm-50 transition-colors"
-            style={{ boxShadow: "0 1px 2px rgba(15,23,41,.06)" }}
-          >
-            <ShieldCheck size={15} aria-hidden="true" />
-            <span className="hidden sm:inline">Créer un compte</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setCreateAccountOpen(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md font-sans text-[13px] font-bold border border-warm-200 bg-white cursor-pointer text-ink-700 hover:bg-warm-50 transition-colors"
+              style={{ boxShadow: "0 1px 2px rgba(15,23,41,.06)" }}
+            >
+              <ShieldCheck size={15} aria-hidden="true" />
+              <span className="hidden sm:inline">Créer un compte</span>
+            </button>
+          )}
           <button
             onClick={() => setModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-4 sm:px-4.5 py-2.5 rounded-md font-sans text-[13px] sm:text-[14px] font-bold border-none cursor-pointer"

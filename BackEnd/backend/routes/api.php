@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\DepartmentController;
@@ -19,6 +20,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/create-account',        [RegisterController::class, 'createAccount']);
 
     Route::get('/dashboard/stats',   [DashboardController::class, 'stats']);
+    Route::get('/reports',           [ReportsController::class, 'index']);
     Route::get('/me/profile',       [MeController::class, 'profile']);
     Route::patch('/me/profile',     [MeController::class, 'updateProfile']);
     Route::post('/me/avatar',       [MeController::class, 'uploadAvatar']);
