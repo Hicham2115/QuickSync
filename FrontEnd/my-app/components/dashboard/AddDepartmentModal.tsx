@@ -6,7 +6,7 @@ import { api } from "@/lib/axios";
 import axios from "axios";
 import { X, Building2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Field, NumInput, inputCls } from "@/components/dashboard/shared/ModalFormField";
+import { Field, inputCls } from "@/components/dashboard/shared/ModalFormField";
 import type { Department } from "@/lib/mock/hr-data";
 
 interface Props {
@@ -17,8 +17,6 @@ interface Props {
 interface DeptForm {
   name: string;
   head: string;
-  count: number;
-  active: number;
   color: string;
 }
 
@@ -28,7 +26,7 @@ const PRESET_COLORS = [
   "#B4453A","#2C3E63","#76766C","#947024",
 ];
 
-const EMPTY: DeptForm = { name: "", head: "", count: 0, active: 0, color: "#4E6BA6" };
+const EMPTY: DeptForm = { name: "", head: "", color: "#4E6BA6" };
 
 export function AddDepartmentModal({ open, onClose }: Props) {
   const queryClient = useQueryClient();
@@ -40,9 +38,8 @@ export function AddDepartmentModal({ open, onClose }: Props) {
 
   const validate = (): boolean => {
     const e: typeof errors = {};
-    if (!form.name.trim())  e.name  = "Nom requis";
-    if (!form.head.trim())  e.head  = "Responsable requis";
-    if (form.active > form.count) e.active = "Ne peut pas dépasser l'effectif total";
+    if (!form.name.trim()) e.name = "Nom requis";
+    if (!form.head.trim()) e.head = "Responsable requis";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -116,15 +113,6 @@ export function AddDepartmentModal({ open, onClose }: Props) {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <Field label="Effectif total" error={errors.count}>
-                <NumInput value={form.count} onChange={(v) => set("count", v)} />
-              </Field>
-              <Field label="Employés actifs" error={errors.active}>
-                <NumInput value={form.active} onChange={(v) => set("active", v)} />
-              </Field>
-            </div>
-
             <Field label="Couleur du département">
               <div className="flex flex-wrap gap-2 pt-1">
                 {PRESET_COLORS.map((c) => (
@@ -166,4 +154,3 @@ export function AddDepartmentModal({ open, onClose }: Props) {
     </Dialog>
   );
 }
-

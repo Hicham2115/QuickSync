@@ -6,7 +6,8 @@ import { api } from "@/lib/axios";
 import axios from "axios";
 import { X, Building2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Field, NumInput, inputCls } from "@/components/dashboard/shared/ModalFormField";
+import { Field, inputCls } from "@/components/dashboard/shared/ModalFormField";
+import { Users, UserCheck } from "lucide-react";
 import type { Department } from "@/lib/mock/hr-data";
 
 interface Props {
@@ -17,8 +18,6 @@ interface Props {
 interface DeptForm {
   name: string;
   head: string;
-  count: number;
-  active: number;
   color: string;
 }
 
@@ -35,13 +34,7 @@ export function EditDepartmentModal({ department, onClose }: Props) {
 
   useEffect(() => {
     if (department) {
-      setForm({
-        name:   department.name,
-        head:   department.head,
-        count:  department.count,
-        active: department.active,
-        color:  department.color,
-      });
+      setForm({ name: department.name, head: department.head, color: department.color });
       setErrors({});
     }
   }, [department]);
@@ -54,7 +47,6 @@ export function EditDepartmentModal({ department, onClose }: Props) {
     const e: typeof errors = {};
     if (!form.name.trim()) e.name = "Nom requis";
     if (!form.head.trim()) e.head = "Responsable requis";
-    if (form.active > form.count) e.active = "Ne peut pas dépasser l'effectif total";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -126,13 +118,26 @@ export function EditDepartmentModal({ department, onClose }: Props) {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <Field label="Effectif total" error={errors.count}>
-                <NumInput value={form.count} onChange={(v) => set("count", v)} />
-              </Field>
-              <Field label="Employés actifs" error={errors.active}>
-                <NumInput value={form.active} onChange={(v) => set("active", v)} />
-              </Field>
+            {/* Read-only stats computed from employee data */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-md px-4 py-3 flex items-center gap-3" style={{ background: "#F7F7F5", border: "1px solid #DEDED8" }}>
+                <Users size={16} className="text-warm-400 shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="font-mono text-[9px] uppercase tracking-widest text-warm-400">Effectif total</p>
+                  <p className="font-display text-[22px] font-medium text-ink-900 leading-tight" style={{ letterSpacing: "-0.02em" }}>
+                    {department?.count ?? 0}
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-md px-4 py-3 flex items-center gap-3" style={{ background: "#F7F7F5", border: "1px solid #DEDED8" }}>
+                <UserCheck size={16} className="text-emerald-600 shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="font-mono text-[9px] uppercase tracking-widest text-warm-400">Employés actifs</p>
+                  <p className="font-display text-[22px] font-medium text-ink-900 leading-tight" style={{ letterSpacing: "-0.02em" }}>
+                    {department?.active ?? 0}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <Field label="Couleur du département">
