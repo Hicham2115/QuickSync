@@ -96,13 +96,14 @@ export function EmployeeDashboard() {
     },
   });
 
-  const { data: notifications = [], isLoading: notifLoading } = useQuery<Notification[]>({
-    queryKey: ["my-notifications"],
+  const { data: notifData, isLoading: notifLoading } = useQuery<{ notifications: Notification[]; unread: number }>({
+    queryKey: ["notifications"],
     queryFn: async () => {
       try { return (await api.get("/api/me/notifications")).data; }
       catch (err) { if (axios.isAxiosError(err)) throw new Error(err.response?.data?.message ?? "Erreur"); throw err; }
     },
   });
+  const notifications = notifData?.notifications ?? [];
 
   const { data: teamData, isLoading: teamLoading } = useQuery<TeamCalendar>({
     queryKey: ["my-team"],

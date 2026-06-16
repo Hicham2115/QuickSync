@@ -13,6 +13,8 @@ import {
   UsersRound,
   ClipboardCheck,
   UserRound,
+  FileText,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -47,8 +49,10 @@ const ALL_NAV_GROUPS: NavGroup[] = [
   {
     label: "OUTILS",
     items: [
-      { icon: BarChart3,  label: "Rapports", href: "/dashboard/rapports", roles: ["admin", "rh"] },
-      { icon: UsersRound, label: "Equipe",   href: "/dashboard/equipe",   roles: ["admin"] },
+      { icon: FileText,   label: "Documents",  href: "/dashboard/documents", roles: ["admin", "rh", "employee"] },
+      { icon: Megaphone,  label: "Annonces",   href: "/dashboard/annonces",  roles: ["admin", "rh"] },
+      { icon: BarChart3,  label: "Rapports",   href: "/dashboard/rapports",  roles: ["admin", "rh"] },
+      { icon: UsersRound, label: "Equipe",     href: "/dashboard/equipe",    roles: ["admin"] },
     ],
   },
 ];

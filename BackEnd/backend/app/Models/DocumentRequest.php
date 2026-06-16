@@ -4,22 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Attendance extends Model
+class DocumentRequest extends Model
 {
     protected $fillable = [
         'user_id',
         'employee_name',
         'dept',
-        'date',
-        'checked_in_at',
-        'checked_out_at',
-        'break_started_at',
-        'break_minutes',
-        'note',
-    ];
-
-    protected $casts = [
-        'date' => 'date',
+        'job_title',
+        'hired_date',
+        'type',
+        'status',
+        'admin_note',
     ];
 
     public function user()

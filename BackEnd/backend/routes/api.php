@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LeaveController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MeController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\AnnouncementController;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
@@ -27,11 +30,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/me/leaves',        [MeController::class, 'leaves']);
     Route::post('/me/leaves',       [MeController::class, 'storeLeave']);
     Route::get('/me/balance',       [MeController::class, 'balance']);
-    Route::get('/me/notifications', [MeController::class, 'notifications']);
+    Route::get('/me/notifications',          [NotificationController::class, 'index']);
+    Route::post('/me/notifications/read-all',[NotificationController::class, 'markAllRead']);
     Route::get('/me/team',          [MeController::class, 'teamCalendar']);
-    Route::post('/me/attendance',   [AttendanceController::class, 'checkIn']);
-    Route::get('/me/attendance',    [AttendanceController::class, 'myAttendance']);
-    Route::get('/attendance',       [AttendanceController::class, 'allAttendance']);
+    Route::post('/me/attendance',            [AttendanceController::class, 'checkIn']);
+    Route::post('/me/attendance/checkout',   [AttendanceController::class, 'checkOut']);
+    Route::post('/me/attendance/break-start',[AttendanceController::class, 'breakStart']);
+    Route::post('/me/attendance/break-end',  [AttendanceController::class, 'breakEnd']);
+    Route::get('/me/attendance',             [AttendanceController::class, 'myAttendance']);
+    Route::get('/attendance',                [AttendanceController::class, 'allAttendance']);
     Route::get('/admin/users',                  [UserController::class, 'index']);
     Route::patch('/admin/users/{user}',         [UserController::class, 'update']);
     Route::patch('/admin/users/{user}/role',    [UserController::class, 'updateRole']);
@@ -45,6 +52,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/departments',            [DepartmentController::class, 'store']);
     Route::put('/departments/{department}',    [DepartmentController::class, 'update']);
     Route::delete('/departments/{department}', [DepartmentController::class, 'destroy']);
+
+    // Documents
+    Route::get('/me/documents',                        [DocumentController::class, 'myRequests']);
+    Route::post('/me/documents',                       [DocumentController::class, 'store']);
+    Route::get('/documents',                           [DocumentController::class, 'index']);
+    Route::patch('/documents/{document}/status',       [DocumentController::class, 'updateStatus']);
+    Route::delete('/documents/{document}',             [DocumentController::class, 'destroy']);
+
+    // Announcements
+    Route::get('/announcements',                       [AnnouncementController::class, 'index']);
+    Route::post('/announcements',                      [AnnouncementController::class, 'store']);
+    Route::delete('/announcements/{announcement}',     [AnnouncementController::class, 'destroy']);
 
     Route::get('/leaves',             [LeaveController::class, 'index']);
     Route::post('/leaves',            [LeaveController::class, 'store']);

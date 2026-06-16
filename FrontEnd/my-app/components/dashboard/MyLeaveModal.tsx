@@ -9,22 +9,27 @@ import { X, CalendarPlus, Paperclip, FileText, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { AppDatePicker } from "@/components/ui/AppDatePicker";
-import { Field, NumInput } from "@/components/dashboard/shared/ModalFormField";
+import { Field } from "@/components/dashboard/shared/ModalFormField";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
+function calcDays(from: string, to: string): number {
+  if (!from || !to) return 0;
+  const diff = Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86_400_000) + 1;
+  return Math.max(0, diff);
+}
+
 interface Form {
   type: string;
   from: string;
   to: string;
-  days: number;
   reason: string;
 }
 
-const EMPTY: Form = { type: "", from: "", to: "", days: 1, reason: "" };
+const EMPTY: Form = { type: "", from: "", to: "", reason: "" };
 
 const TYPE_OPTIONS = [
   { value: "Annuel",     label: "Annuel" },
@@ -67,12 +72,13 @@ export function MyLeaveModal({ open, onClose }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const days = calcDays(form.from, form.to);
+
   const validate = (): boolean => {
     const e: typeof errors = {};
-    if (!form.type)         e.type   = "Type requis";
-    if (!form.from)         e.from   = "Date de début requise";
-    if (!form.to)           e.to     = "Date de fin requise";
-    if (form.days < 1)      e.days   = "Minimum 1 jour";
+    if (!form.type)          e.type   = "Type requis";
+    if (!form.from)          e.from   = "Date de début requise";
+    if (!form.to)            e.to     = "Date de fin requise";
     if (!form.reason.trim()) e.reason = "Motif requis";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -83,6 +89,7 @@ export function MyLeaveModal({ open, onClose }: Props) {
       try {
         const body = new FormData();
         Object.entries(payload).forEach(([k, v]) => body.append(k, String(v)));
+        body.append("days", String(calcDays(payload.from, payload.to)));
         if (file) body.append("attachment", file);
         const res = await api.post("/api/me/leaves", body, {
           headers: { "Content-Type": "multipart/form-data" },
@@ -178,8 +185,11 @@ export function MyLeaveModal({ open, onClose }: Props) {
               </Field>
             </div>
 
-            <Field label="Nombre de jours" error={errors.days}>
-              <NumInput value={form.days} onChange={(v) => set("days", v)} min={1} />
+            <Field label="Nombre de jours">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-md border border-warm-200 bg-warm-50">
+                <span className="font-display text-[18px] font-medium text-ink-900">{days || "–"}</span>
+                <span className="font-sans text-[12px] text-warm-400">jour{days !== 1 ? "s" : ""}</span>
+              </div>
             </Field>
 
             <Field label="Motif" error={errors.reason} required>

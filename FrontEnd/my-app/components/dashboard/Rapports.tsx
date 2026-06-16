@@ -143,7 +143,7 @@ export function Rapports() {
       columnStyles: { 1: { fontStyle: "bold", halign: "center" } },
       theme: "grid",
     });
-    y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2;
+    y = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2;
     gap();
 
     // 2. Departments
@@ -162,7 +162,7 @@ export function Rapports() {
       columnStyles: { 2: { halign: "center" }, 3: { halign: "center" }, 4: { halign: "center", textColor: GREEN } },
       theme: "grid",
     });
-    y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2;
+    y = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2;
     gap();
 
     // 3. Leaves
@@ -190,7 +190,7 @@ export function Rapports() {
       },
       theme: "grid",
     });
-    y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2;
+    y = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2;
     gap();
 
     // 4. Employees
@@ -352,7 +352,7 @@ export function Rapports() {
                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number, name: string) => [`${v} j`, name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e8e5e0" }} />
+                    <Tooltip formatter={(v, name) => [`${v} j`, name as string]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e8e5e0" }} />
                     <Legend iconSize={10} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
                   </PieChart>
                 </ChartContainer>
@@ -375,7 +375,7 @@ export function Rapports() {
                         <Cell key={i} fill={STATUS_COLORS[i % STATUS_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number, name: string) => [`${v} employés`, name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e8e5e0" }} />
+                    <Tooltip formatter={(v, name) => [`${v} employés`, name as string]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e8e5e0" }} />
                     <Legend iconSize={10} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
                   </PieChart>
                 </ChartContainer>

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import axios from "axios";
@@ -45,6 +45,16 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<EmployeeForm | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof EmployeeForm, string>>>({});
+
+  const { data: departments = [] } = useQuery<{ id: number; name: string }[]>({
+    queryKey: ["departments"],
+    queryFn: async () => {
+      try { return (await api.get("/api/departments")).data; }
+      catch { return []; }
+    },
+    staleTime: 30_000,
+  });
+  const deptOptions = departments.map((d) => ({ value: d.name, label: d.name }));
 
   useEffect(() => {
     if (employee) {
@@ -92,6 +102,7 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["departments"] });
       toast.success("Employé mis à jour.");
       onClose();
     },
@@ -160,7 +171,13 @@ export function EditEmployeeModal({ employee, onClose }: Props) {
             {/* Role */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Field label="Département" error={errors.dept} required>
-                <input value={form.dept} onChange={(e) => set("dept", e.target.value)} placeholder="Engineering" className={inputCls(!!errors.dept)} />
+                <AppSelect
+                  value={form.dept}
+                  onChange={(v) => set("dept", v)}
+                  placeholder="Sélectionner un département"
+                  options={deptOptions}
+                  error={!!errors.dept}
+                />
               </Field>
               <Field label="Poste" error={errors.title} required>
                 <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Lead Developer" className={inputCls(!!errors.title)} />

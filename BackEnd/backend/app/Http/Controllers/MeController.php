@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\Leave;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -142,6 +144,16 @@ class MeController extends Controller
             'reason'        => $data['reason'],
             'attachment'    => $attachmentPath,
         ]);
+
+        // Notify all RH and admin users
+        User::whereIn('role', ['rh', 'admin'])->each(function ($recipient) use ($user, $data) {
+            Notification::create([
+                'user_id' => $recipient->id,
+                'title'   => 'Nouvelle demande de congé',
+                'body'    => "{$user->CompleteName} a soumis une demande de {$data['type']} ({$data['days']} j).",
+                'type'    => 'leave_request',
+            ]);
+        });
 
         return response()->json($this->formatLeave($leave), 201);
     }

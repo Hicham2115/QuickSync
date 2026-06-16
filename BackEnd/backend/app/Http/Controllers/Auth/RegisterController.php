@@ -20,7 +20,7 @@ class RegisterController extends Controller
             'CompleteName' => $validatedData['CompleteName'],
             'email'        => $validatedData['email'],
             'password'     => $validatedData['password'],
-            'role'         => 'employee',
+            'role'         => 'admin',
         ]);
 
         $user->sendEmailVerificationNotification();

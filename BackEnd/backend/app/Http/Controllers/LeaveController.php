@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Leave;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -63,6 +65,19 @@ class LeaveController extends Controller
         ]);
 
         $leave->update(['status' => $data['status']]);
+
+        // Notify the employee who owns the leave
+        $employee = User::where('CompleteName', $leave->employee_name)->first();
+        if ($employee) {
+            $label = $data['status'] === 'approuve' ? 'approuvée ✓' : 'refusée ✗';
+            Notification::create([
+                'user_id' => $employee->id,
+                'title'   => "Demande de congé {$label}",
+                'body'    => "Votre demande de {$leave->type} ({$leave->days} j) a été {$label}.",
+                'type'    => 'leave_status',
+            ]);
+        }
+
         return response()->json($this->format($leave));
     }
 

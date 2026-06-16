@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { AppDatePicker } from "@/components/ui/AppDatePicker";
-import { Field, NumInput, inputCls } from "@/components/dashboard/shared/ModalFormField";
+import { Field, inputCls } from "@/components/dashboard/shared/ModalFormField";
+
+function calcDays(from: string, to: string): number {
+  if (!from || !to) return 0;
+  const diff = Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86_400_000) + 1;
+  return Math.max(0, diff);
+}
 
 interface Props {
   open: boolean;
@@ -26,11 +32,10 @@ interface LeaveForm {
   type: string;
   from: string;
   to: string;
-  days: number;
   reason: string;
 }
 
-const EMPTY: LeaveForm = { employee: "", dept: "", type: "", from: "", to: "", days: 1, reason: "" };
+const EMPTY: LeaveForm = { employee: "", dept: "", type: "", from: "", to: "", reason: "" };
 
 const TYPE_OPTIONS = [
   { value: "Annuel",     label: "Annuel" },
@@ -49,6 +54,8 @@ export function AddLeaveModal({ open, onClose }: Props) {
   const set = <K extends keyof LeaveForm>(field: K, value: LeaveForm[K]) =>
     setForm((f) => ({ ...f, [field]: value }));
 
+  const days = calcDays(form.from, form.to);
+
   const validate = (): boolean => {
     const e: typeof errors = {};
     if (!form.employee.trim()) e.employee = "Nom requis";
@@ -56,7 +63,6 @@ export function AddLeaveModal({ open, onClose }: Props) {
     if (!form.type)            e.type     = "Type requis";
     if (!form.from)            e.from     = "Date de début requise";
     if (!form.to)              e.to       = "Date de fin requise";
-    if (form.days < 1)         e.days     = "Minimum 1 jour";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -64,7 +70,7 @@ export function AddLeaveModal({ open, onClose }: Props) {
   const mutation = useMutation({
     mutationFn: async (payload: LeaveForm) => {
       try {
-        const res = await api.post("/api/leaves", payload);
+        const res = await api.post("/api/leaves", { ...payload, days: calcDays(payload.from, payload.to) });
         return res.data;
       } catch (err) {
         if (axios.isAxiosError(err))
@@ -170,8 +176,11 @@ export function AddLeaveModal({ open, onClose }: Props) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <Field label="Nombre de jours" error={errors.days} required>
-                <NumInput value={form.days} onChange={(v) => set("days", v)} min={1} />
+              <Field label="Nombre de jours">
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-md border border-warm-200 bg-warm-50">
+                  <span className="font-display text-[18px] font-medium text-ink-900">{days || "–"}</span>
+                  <span className="font-sans text-[12px] text-warm-400">jour{days !== 1 ? "s" : ""}</span>
+                </div>
               </Field>
               <Field label="Motif">
                 <input

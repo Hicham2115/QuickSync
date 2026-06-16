@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import axios from "axios";
@@ -45,6 +45,16 @@ export function AddEmployeeModal({ open, onClose }: Props) {
   const [form, setForm] = useState<EmployeeForm>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof EmployeeForm, string>>>({});
 
+  const { data: departments = [] } = useQuery<{ id: number; name: string }[]>({
+    queryKey: ["departments"],
+    queryFn: async () => {
+      try { return (await api.get("/api/departments")).data; }
+      catch { return []; }
+    },
+    staleTime: 30_000,
+  });
+  const deptOptions = departments.map((d) => ({ value: d.name, label: d.name }));
+
   const set = <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) =>
     setForm((f) => ({ ...f, [field]: value }));
 
@@ -73,6 +83,7 @@ export function AddEmployeeModal({ open, onClose }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["departments"] });
       toast.success("Employé ajouté avec succès.");
       setForm(EMPTY);
       setErrors({});
@@ -155,11 +166,12 @@ export function AddEmployeeModal({ open, onClose }: Props) {
             {/* Row 2: Dept + Title */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Field label="Département" error={errors.dept} required>
-                <input
+                <AppSelect
                   value={form.dept}
-                  onChange={(e) => set("dept", e.target.value)}
-                  placeholder="Engineering"
-                  className={inputCls(!!errors.dept)}
+                  onChange={(v) => set("dept", v)}
+                  placeholder="Sélectionner un département"
+                  options={deptOptions}
+                  error={!!errors.dept}
                 />
               </Field>
               <Field label="Poste" error={errors.title} required>
