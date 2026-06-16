@@ -12,6 +12,7 @@ import { AureaPagination } from '@/components/ui/AureaPagination';
 import { AddLeaveModal } from './AddLeaveModal';
 import { DeleteModal } from './shared/DeleteModal';
 import type { Leave } from '@/lib/mock/hr-data';
+import { useAuthStore } from '@/lib/store/useAuthStore';
 
 type TabKey = 'all' | 'en_attente' | 'approuve' | 'refuse';
 const PAGE_SIZE = 10;
@@ -21,6 +22,7 @@ const COLS = '2fr 1fr 1.5fr .5fr .9fr 1.6fr';
 
 export function Conges() {
   const queryClient = useQueryClient();
+  const canManage = useAuthStore((s) => s.user?.role !== 'employee');
   const [tab, setTab]                   = useState<TabKey>('all');
   const [typeFilter, setTypeFilter]     = useState('');
   const [page, setPage]                 = useState(1);
@@ -229,7 +231,7 @@ export function Conges() {
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     <StatusBadge status={l.status} />
                     <div className="flex gap-1">
-                      {l.status === 'en_attente' ? (
+                      {canManage && l.status === 'en_attente' && (
                         <>
                           <button
                             onClick={() => statusMutation.mutate({ id: l.id, status: 'approuve' })}
@@ -250,18 +252,19 @@ export function Conges() {
                             <X size={12} aria-hidden="true" />
                           </button>
                         </>
-                      ) : (
-                        <button className="flex items-center justify-center w-7 h-7 rounded-md cursor-pointer border border-warm-200 bg-warm-50 hover:bg-warm-100 transition-colors text-warm-500">
-                          <Eye size={12} aria-hidden="true" />
+                      )}
+                      <button className="flex items-center justify-center w-7 h-7 rounded-md cursor-pointer border border-warm-200 bg-warm-50 hover:bg-warm-100 transition-colors text-warm-500">
+                        <Eye size={12} aria-hidden="true" />
+                      </button>
+                      {canManage && (
+                        <button
+                          onClick={() => setDeleteTarget(l)}
+                          title="Supprimer"
+                          className="flex items-center justify-center w-7 h-7 rounded-md cursor-pointer text-warm-400 hover:text-[#B4453A] hover:bg-[#F8E5E2] border border-warm-200 transition-colors"
+                        >
+                          <Trash2 size={12} aria-hidden="true" />
                         </button>
                       )}
-                      <button
-                        onClick={() => setDeleteTarget(l)}
-                        title="Supprimer"
-                        className="flex items-center justify-center w-7 h-7 rounded-md cursor-pointer text-warm-400 hover:text-[#B4453A] hover:bg-[#F8E5E2] border border-warm-200 transition-colors"
-                      >
-                        <Trash2 size={12} aria-hidden="true" />
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -293,7 +296,7 @@ export function Conges() {
 
                   {/* Actions */}
                   <div className="flex items-center justify-center gap-1.5">
-                    {l.status === 'en_attente' ? (
+                    {canManage && l.status === 'en_attente' && (
                       <>
                         <button
                           onClick={() => statusMutation.mutate({ id: l.id, status: 'approuve' })}
@@ -314,19 +317,20 @@ export function Conges() {
                           <span className="hidden lg:inline">Refuser</span>
                         </button>
                       </>
-                    ) : (
-                      <button className="inline-flex items-center gap-1 px-2 lg:px-2.5 py-1 rounded-md font-sans text-[11px] text-warm-500 cursor-pointer border border-warm-200 bg-warm-50 hover:bg-warm-100 transition-colors">
-                        <Eye size={10} aria-hidden="true" />
-                        <span className="hidden lg:inline">Détails</span>
+                    )}
+                    <button className="inline-flex items-center gap-1 px-2 lg:px-2.5 py-1 rounded-md font-sans text-[11px] text-warm-500 cursor-pointer border border-warm-200 bg-warm-50 hover:bg-warm-100 transition-colors">
+                      <Eye size={10} aria-hidden="true" />
+                      <span className="hidden lg:inline">Détails</span>
+                    </button>
+                    {canManage && (
+                      <button
+                        onClick={() => setDeleteTarget(l)}
+                        title="Supprimer"
+                        className="w-7 h-7 rounded-md flex items-center justify-center text-warm-400 hover:text-[#B4453A] hover:bg-[#F8E5E2] transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={13} aria-hidden="true" />
                       </button>
                     )}
-                    <button
-                      onClick={() => setDeleteTarget(l)}
-                      title="Supprimer"
-                      className="w-7 h-7 rounded-md flex items-center justify-center text-warm-400 hover:text-[#B4453A] hover:bg-[#F8E5E2] transition-colors cursor-pointer"
-                    >
-                      <Trash2 size={13} aria-hidden="true" />
-                    </button>
                   </div>
                 </div>
 

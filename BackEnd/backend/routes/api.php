@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
@@ -12,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user',      fn (Request $request) => $request->user());
+    Route::post('/admin/create-account',        [RegisterController::class, 'createAccount']);
+    Route::get('/admin/users',                  [UserController::class, 'index']);
+    Route::patch('/admin/users/{user}/role',    [UserController::class, 'updateRole']);
+    Route::delete('/admin/users/{user}',        [UserController::class, 'destroy']);
     Route::get('/employees',          [EmployeeController::class, 'index']);
     Route::post('/employees',         [EmployeeController::class, 'store']);
     Route::put('/employees/{employee}',    [EmployeeController::class, 'update']);

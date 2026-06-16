@@ -7,7 +7,9 @@ import {
   List,
   ChevronUp,
   ChevronDown,
+  ShieldCheck,
 } from "lucide-react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
@@ -19,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { EditEmployeeModal } from "./EditEmployeeModal";
+import { CreateAccountModal } from "./CreateAccountModal";
 import { DeleteModal } from "./shared/DeleteModal";
 import { Pencil, Trash2 } from "lucide-react";
 import { AureaPagination } from "@/components/ui/AureaPagination";
@@ -42,6 +45,7 @@ export function Personnel() {
   const [status, setStatus] = useState("");
   const [view, setView] = useState<"table" | "cards">("table");
   const [modalOpen, setModalOpen] = useState(false);
+  const [createAccountOpen, setCreateAccountOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Employee | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null);
   const [sortCol, setSortCol] = useState<SortKey>("name");
@@ -142,19 +146,29 @@ export function Personnel() {
             ? "Chargement…"
             : `${employees.length} collaborateur${employees.length !== 1 ? "s" : ""}`}
         </p>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-1.5 px-4 sm:px-4.5 py-2.5 rounded-md font-sans text-[13px] sm:text-[14px] font-bold border-none cursor-pointer self-start sm:self-auto"
-          style={{
-            background: "linear-gradient(140deg,#CBA24A,#947024)",
-            color: "#0F1729",
-            boxShadow: "0 2px 10px rgba(180,134,47,.28)",
-          }}
-        >
-          <UserPlus size={15} aria-hidden="true" />
-          <span className="hidden sm:inline">Ajouter un employé</span>
-          <span className="sm:hidden">Ajouter</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setCreateAccountOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md font-sans text-[13px] font-bold border border-warm-200 bg-white cursor-pointer text-ink-700 hover:bg-warm-50 transition-colors"
+            style={{ boxShadow: "0 1px 2px rgba(15,23,41,.06)" }}
+          >
+            <ShieldCheck size={15} aria-hidden="true" />
+            <span className="hidden sm:inline">Créer un compte</span>
+          </button>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 sm:px-4.5 py-2.5 rounded-md font-sans text-[13px] sm:text-[14px] font-bold border-none cursor-pointer"
+            style={{
+              background: "linear-gradient(140deg,#CBA24A,#947024)",
+              color: "#0F1729",
+              boxShadow: "0 2px 10px rgba(180,134,47,.28)",
+            }}
+          >
+            <UserPlus size={15} aria-hidden="true" />
+            <span className="hidden sm:inline">Ajouter un employé</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
+        </div>
       </div>
 
       {/* Toolbar */}
@@ -432,6 +446,7 @@ export function Personnel() {
       )}
 
       <AddEmployeeModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <CreateAccountModal open={createAccountOpen} onClose={() => setCreateAccountOpen(false)} />
       <EditEmployeeModal employee={editTarget} onClose={() => setEditTarget(null)} />
       <DeleteModal
         open={!!deleteTarget}

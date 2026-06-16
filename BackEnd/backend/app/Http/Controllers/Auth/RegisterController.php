@@ -20,12 +20,37 @@ class RegisterController extends Controller
             'CompleteName' => $validatedData['CompleteName'],
             'email'        => $validatedData['email'],
             'password'     => $validatedData['password'],
+            'role'         => 'employee',
         ]);
 
         $user->sendEmailVerificationNotification();
 
         return response()->json([
             'message' => 'Account created. Please check your email to verify your account.',
+            'user'    => $user,
+        ], 201);
+    }
+
+    public function createAccount(Request $request)
+    {
+        $validatedData = $request->validate([
+            'CompleteName' => 'required|string|max:255',
+            'email'        => 'required|string|email|max:255|unique:users',
+            'password'     => 'required|string|min:8|confirmed',
+            'role'         => 'required|in:rh,employee',
+        ]);
+
+        $user = User::create([
+            'CompleteName' => $validatedData['CompleteName'],
+            'email'        => $validatedData['email'],
+            'password'     => $validatedData['password'],
+            'role'         => $validatedData['role'],
+        ]);
+
+        $user->markEmailAsVerified();
+
+        return response()->json([
+            'message' => 'Compte créé avec succès.',
             'user'    => $user,
         ], 201);
     }
