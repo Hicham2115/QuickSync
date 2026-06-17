@@ -33,6 +33,10 @@ class AnnouncementController extends Controller
     {
         $user = $request->user();
 
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Seul un administrateur peut créer des annonces.'], 403);
+        }
+
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'body'  => 'required|string|max:2000',
@@ -61,8 +65,11 @@ class AnnouncementController extends Controller
         return response()->json($this->format($announcement), 201);
     }
 
-    public function destroy(Announcement $announcement): JsonResponse
+    public function destroy(Request $request, Announcement $announcement): JsonResponse
     {
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Non autorisé.'], 403);
+        }
         $announcement->delete();
         return response()->json(['message' => 'Annonce supprimée.']);
     }

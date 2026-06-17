@@ -44,15 +44,15 @@ const ALL_NAV_GROUPS: NavGroup[] = [
       { icon: CalendarDays,    label: "Congés",          href: "/dashboard/conges",       roles: ["admin", "rh", "employee"] },
       { icon: ClipboardCheck,  label: "Présence",        href: "/dashboard/presence",     roles: ["admin", "rh", "employee"] },
       { icon: Building2,       label: "Départements",    href: "/dashboard/departements", roles: ["admin", "rh"] },
+      { icon: Megaphone,       label: "Annonces",        href: "/dashboard/annonces",     roles: ["admin", "rh", "employee"] },
+      { icon: FileText,        label: "Documents",       href: "/dashboard/documents",    roles: ["admin", "rh", "employee"] },
     ],
   },
   {
     label: "OUTILS",
     items: [
-      { icon: FileText,   label: "Documents",  href: "/dashboard/documents", roles: ["admin", "rh", "employee"] },
-      { icon: Megaphone,  label: "Annonces",   href: "/dashboard/annonces",  roles: ["admin", "rh"] },
-      { icon: BarChart3,  label: "Rapports",   href: "/dashboard/rapports",  roles: ["admin", "rh"] },
-      { icon: UsersRound, label: "Equipe",     href: "/dashboard/equipe",    roles: ["admin"] },
+      { icon: BarChart3,  label: "Rapports", href: "/dashboard/rapports", roles: ["admin", "rh"] },
+      { icon: UsersRound, label: "Equipe",   href: "/dashboard/equipe",   roles: ["admin"] },
     ],
   },
 ];

@@ -56,119 +56,208 @@ function StatusBadge({ status }: { status: DocRequest["status"] }) {
 async function generatePDF(doc: DocRequest) {
   const { default: jsPDF } = await import("jspdf");
 
-  const pdf   = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const W     = 210;
-  const M     = 20;
-  const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-  const isSalaire = doc.type === "attestation_salaire";
+  const pdf        = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const W          = 210;
+  const H          = 297;
+  const STRIPE     = 8;    // left gold stripe width
+  const LM         = STRIPE + 16; // left text margin
+  const RM         = W - 18;
+  const today      = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const year       = new Date().getFullYear();
+  const ref        = `ATT-${year}-${String(doc.id).padStart(4, "0")}`;
+  const isSalaire  = doc.type === "attestation_salaire";
+  const docTitle   = isSalaire ? "ATTESTATION DE SALAIRE" : "ATTESTATION DE TRAVAIL";
 
-  // Header bar
+  // ── Left gold stripe
+  pdf.setFillColor(180, 134, 47);
+  pdf.rect(0, 0, STRIPE, H, "F");
+
+  // ── Top accent line (dark navy)
   pdf.setFillColor(19, 27, 44);
-  pdf.rect(0, 0, W, 30, "F");
-  pdf.setTextColor(203, 162, 74);
-  pdf.setFontSize(18);
-  pdf.setFont("helvetica", "bold");
-  pdf.text("AUREA HR", M, 19);
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(9);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Système de Gestion des Ressources Humaines", W - M, 19, { align: "right" });
+  pdf.rect(STRIPE, 0, W - STRIPE, 3, "F");
 
-  // Title
+  // ── Company header
+  let y = 22;
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(22);
   pdf.setTextColor(19, 27, 44);
-  pdf.setFontSize(16);
-  pdf.setFont("helvetica", "bold");
-  const title = isSalaire ? "ATTESTATION DE SALAIRE" : "ATTESTATION DE TRAVAIL";
-  pdf.text(title, W / 2, 52, { align: "center" });
+  pdf.text("AUREA HR", LM, y);
 
-  // Underline
-  pdf.setDrawColor(203, 162, 74);
-  pdf.setLineWidth(0.8);
-  pdf.line(M + 20, 56, W - M - 20, 56);
-
-  // Reference
-  pdf.setFontSize(9);
   pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(9);
   pdf.setTextColor(120, 120, 110);
-  pdf.text(`Réf. DOC-${String(doc.id).padStart(4, "0")} · Délivrée le ${today}`, W / 2, 63, { align: "center" });
+  y += 6;
+  pdf.text("Système de Gestion des Ressources Humaines", LM, y);
 
-  // Body text
-  pdf.setFontSize(11);
-  pdf.setTextColor(19, 27, 44);
-  pdf.setFont("helvetica", "normal");
-
-  const civility = "M./Mme";
-  let y = 82;
-  const lineH = 7;
-
-  pdf.text("Nous soussignés, la Direction des Ressources Humaines d'Aurea HR, attestons", M, y); y += lineH;
-  pdf.text("par la présente que :", M, y); y += lineH * 1.6;
-
-  // Employee info box
-  pdf.setFillColor(247, 247, 245);
-  pdf.setDrawColor(222, 222, 216);
-  pdf.setLineWidth(0.4);
-  pdf.roundedRect(M, y, W - M * 2, isSalaire ? 52 : 44, 3, 3, "FD");
-
-  const lx = M + 8;
-  let ly = y + 10;
-  const labelColor: [number, number, number] = [120, 120, 110];
-  const valColor:   [number, number, number] = [19,  27,  44];
-
-  function row(label: string, value: string) {
-    pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(...labelColor);
-    pdf.setFontSize(8.5);
-    pdf.text(label.toUpperCase(), lx, ly);
-    pdf.setFont("helvetica", "normal");
-    pdf.setTextColor(...valColor);
-    pdf.setFontSize(11);
-    pdf.text(value || "–", lx + 42, ly);
-    ly += 9;
-  }
-
-  row("Nom complet", `${civility} ${doc.employee_name}`);
-  row("Poste",       doc.job_title  || "–");
-  row("Département", doc.dept       || "–");
-  row("Date d'embauche", doc.hired_date || "–");
-  if (isSalaire) row("Salaire",   "Selon contrat en vigueur");
-
-  y += (isSalaire ? 52 : 44) + 12;
-
-  pdf.setFontSize(11);
-  pdf.setFont("helvetica", "normal");
-  pdf.setTextColor(19, 27, 44);
-
-  if (isSalaire) {
-    pdf.text("L'intéressé(e) perçoit une rémunération conformément aux dispositions", M, y); y += lineH;
-    pdf.text("contractuelles en vigueur au sein de notre entreprise.", M, y); y += lineH * 1.5;
-  }
-
-  pdf.text("La présente attestation est délivrée à l'intéressé(e) à sa demande pour servir", M, y); y += lineH;
-  pdf.text("et valoir ce que de droit.", M, y); y += lineH * 2.5;
-
-  // Signature block
-  pdf.setFillColor(247, 247, 245);
-  pdf.setDrawColor(222, 222, 216);
-  pdf.setLineWidth(0.4);
-  pdf.roundedRect(W - M - 70, y, 70, 36, 3, 3, "FD");
-  pdf.setFontSize(9);
-  pdf.setFont("helvetica", "bold");
-  pdf.setTextColor(19, 27, 44);
-  pdf.text("Direction RH", W - M - 35, y + 10, { align: "center" });
-  pdf.setFont("helvetica", "normal");
-  pdf.setTextColor(120, 120, 110);
-  pdf.text("Cachet et signature", W - M - 35, y + 18, { align: "center" });
-  pdf.text(`Fait le ${today}`, W - M - 35, y + 28, { align: "center" });
-
-  // Footer
-  pdf.setFillColor(240, 240, 238);
-  pdf.rect(0, 282, W, 15, "F");
+  // Reference block (top right)
   pdf.setFontSize(8);
   pdf.setTextColor(150, 150, 140);
-  pdf.text("Aurea HR · Document officiel généré automatiquement · Confidentiel", W / 2, 291, { align: "center" });
+  pdf.text(`Réf : ${ref}`, RM, 19, { align: "right" });
+  pdf.text(`Émis le : ${today}`, RM, 25, { align: "right" });
 
-  pdf.save(`${doc.type}_${doc.employee_name.replace(/\s+/g, "_")}.pdf`);
+  // Divider under header
+  y = 35;
+  pdf.setDrawColor(222, 222, 216);
+  pdf.setLineWidth(0.4);
+  pdf.line(LM, y, RM, y);
+
+  // ── Document title
+  y += 14;
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(17);
+  pdf.setTextColor(19, 27, 44);
+  const titleX = LM + (RM - LM) / 2;
+  pdf.text(docTitle, titleX, y, { align: "center" });
+
+  // Gold underline below title
+  const titleW = pdf.getTextWidth(docTitle);
+  const tlx = titleX - titleW / 2;
+  y += 3;
+  pdf.setDrawColor(180, 134, 47);
+  pdf.setLineWidth(1.2);
+  pdf.line(tlx, y, tlx + titleW, y);
+
+  // ── Intro paragraph
+  y += 16;
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(11);
+  pdf.setTextColor(19, 27, 44);
+  pdf.text("Nous soussignés, la Direction des Ressources Humaines de la société Aurea HR,", LM, y);
+  y += 6.5;
+  pdf.text("attestons par la présente que :", LM, y);
+
+  // ── Employee info box
+  y += 10;
+  const rows: [string, string][] = [
+    ["Nom complet",    doc.employee_name],
+    ["Poste occupé",   doc.job_title   || "–"],
+    ["Département",    doc.dept        || "–"],
+    ["Date d'embauche", doc.hired_date  || "–"],
+  ];
+  if (isSalaire) rows.push(["Rémunération", "Selon contrat en vigueur"]);
+
+  const ROW_H  = 10;
+  const boxH   = rows.length * ROW_H + 6;
+  const boxX   = LM;
+  const boxW   = RM - LM;
+
+  // Box background
+  pdf.setFillColor(250, 249, 246);
+  pdf.setDrawColor(222, 222, 216);
+  pdf.setLineWidth(0.4);
+  pdf.roundedRect(boxX, y, boxW, boxH, 3, 3, "FD");
+
+  // Gold left accent inside box
+  pdf.setFillColor(203, 162, 74);
+  pdf.roundedRect(boxX, y, 3, boxH, 1.5, 1.5, "F");
+
+  const labelX = boxX + 8;
+  const valX   = boxX + 58;
+  let ry = y + ROW_H;
+
+  rows.forEach(([label, value], idx) => {
+    // Row separator (skip first)
+    if (idx > 0) {
+      pdf.setDrawColor(232, 232, 228);
+      pdf.setLineWidth(0.3);
+      pdf.line(boxX + 5, ry - ROW_H / 2 - 1, boxX + boxW - 5, ry - ROW_H / 2 - 1);
+    }
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8.5);
+    pdf.setTextColor(130, 130, 120);
+    pdf.text(label.toUpperCase(), labelX, ry);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10.5);
+    pdf.setTextColor(19, 27, 44);
+    pdf.text(value, valX, ry);
+    ry += ROW_H;
+  });
+
+  y += boxH + 12;
+
+  // ── Body paragraphs
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(11);
+  pdf.setTextColor(19, 27, 44);
+  const lineH = 6.5;
+
+  if (isSalaire) {
+    pdf.text("L'intéressé(e) perçoit une rémunération conformément aux dispositions contractuelles", LM, y);
+    y += lineH;
+    pdf.text("en vigueur au sein de notre entreprise, et ce depuis la date d'embauche mentionnée ci-dessus.", LM, y);
+    y += lineH * 1.8;
+  } else {
+    pdf.text(`L'intéressé(e) est employé(e) au sein de la société Aurea HR en qualité de`, LM, y);
+    y += lineH;
+    pdf.setFont("helvetica", "bold");
+    pdf.text(`${doc.job_title || "–"}, au département ${doc.dept || "–"},`, LM, y);
+    pdf.setFont("helvetica", "normal");
+    y += lineH;
+    pdf.text("et ce depuis la date d'embauche mentionnée ci-dessus.", LM, y);
+    y += lineH * 1.8;
+  }
+
+  pdf.text("La présente attestation est délivrée à l'intéressé(e) à sa demande et pour servir", LM, y);
+  y += lineH;
+  pdf.text("et valoir ce que de droit.", LM, y);
+
+  // ── Signature block (right-aligned)
+  y += 20;
+  const sigW   = 72;
+  const sigX   = RM - sigW;
+  const sigH   = 52;
+
+  // Box
+  pdf.setFillColor(250, 249, 246);
+  pdf.setDrawColor(222, 222, 216);
+  pdf.setLineWidth(0.4);
+  pdf.roundedRect(sigX, y, sigW, sigH, 3, 3, "FD");
+
+  // Title in box
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(8.5);
+  pdf.setTextColor(19, 27, 44);
+  pdf.text("Le/La Directeur(trice) des", sigX + sigW / 2, y + 9, { align: "center" });
+  pdf.text("Ressources Humaines", sigX + sigW / 2, y + 15, { align: "center" });
+
+  // Dashed stamp circle
+  const cx = sigX + sigW / 2;
+  const cy = y + 35;
+  const cr = 11;
+  pdf.setDrawColor(180, 180, 170);
+  pdf.setLineWidth(0.5);
+  // Approximate dashed circle with segments
+  const segs = 24;
+  for (let i = 0; i < segs; i += 2) {
+    const a1 = (i / segs) * 2 * Math.PI;
+    const a2 = ((i + 0.9) / segs) * 2 * Math.PI;
+    pdf.line(cx + Math.cos(a1) * cr, cy + Math.sin(a1) * cr, cx + Math.cos(a2) * cr, cy + Math.sin(a2) * cr);
+  }
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(6.5);
+  pdf.setTextColor(180, 180, 170);
+  pdf.text("CACHET", cx, cy + 2, { align: "center" });
+
+  // Date line
+  pdf.setFontSize(8);
+  pdf.setTextColor(120, 120, 110);
+  pdf.text(`Fait le ${today}`, sigX + sigW / 2, y + sigH - 5, { align: "center" });
+
+  // ── Footer
+  const footY = H - 14;
+  pdf.setFillColor(245, 244, 241);
+  pdf.rect(STRIPE, footY - 4, W - STRIPE, 18, "F");
+  pdf.setFontSize(7.5);
+  pdf.setTextColor(160, 160, 150);
+  pdf.text(
+    `Aurea HR · Document officiel · Réf. ${ref} · Ce document est confidentiel et ne peut être reproduit sans autorisation.`,
+    LM + (RM - LM) / 2,
+    footY + 4,
+    { align: "center" }
+  );
+
+  pdf.save(`${doc.type}_${doc.employee_name.replace(/\s+/g, "_")}_${ref}.pdf`);
 }
 
 /* ── Request modal ───────────────────────────────────── */
@@ -374,6 +463,7 @@ function EmployeeDocuments() {
         throw err;
       }
     },
+    refetchInterval: 15_000,
   });
 
   return (
