@@ -276,14 +276,27 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       {/* Submit */}
       <button
         type="submit"
-        className="w-full h-11 rounded-xl text-sm font-bold font-sans text-ink-900 flex items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-px active:translate-y-0"
+        disabled={signupMutation.isPending}
+        className="w-full h-11 rounded-xl text-sm font-bold font-sans text-ink-900 flex items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-px active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-y-0"
         style={{
           background: "linear-gradient(140deg, #CBA24A, #947024)",
           boxShadow: "0 8px 24px rgba(180,134,47,0.36)",
         }}
       >
-        Créer mon compte
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        {signupMutation.isPending ? (
+          <>
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+            Création en cours…
+          </>
+        ) : (
+          <>
+            Créer mon compte
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </>
+        )}
       </button>
 
       {/* Switch to sign in */}

@@ -9,6 +9,7 @@ export interface Employee {
   leaves: number;
   phone?: string;
   bio?: string;
+  salary?: number | null;
 }
 
 export interface Leave {

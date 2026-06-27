@@ -13,6 +13,9 @@ use App\Http\Controllers\MeController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\MessageController;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
@@ -43,10 +46,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/admin/users/{user}',         [UserController::class, 'update']);
     Route::patch('/admin/users/{user}/role',    [UserController::class, 'updateRole']);
     Route::delete('/admin/users/{user}',        [UserController::class, 'destroy']);
-    Route::get('/employees',          [EmployeeController::class, 'index']);
-    Route::post('/employees',         [EmployeeController::class, 'store']);
+    Route::get('/employees',               [EmployeeController::class, 'index']);
+    Route::post('/employees',              [EmployeeController::class, 'store']);
+    Route::get('/employees/{employee}',    [EmployeeController::class, 'show']);
     Route::put('/employees/{employee}',    [EmployeeController::class, 'update']);
     Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy']);
+
+    // Promotions
+    Route::get('/employees/{employee}/promotions',              [PromotionController::class, 'index']);
+    Route::post('/employees/{employee}/promotions',             [PromotionController::class, 'store']);
+    Route::delete('/employees/{employee}/promotions/{promotion}', [PromotionController::class, 'destroy']);
+
+    // Trainings
+    Route::get('/employees/{employee}/trainings',                    [TrainingController::class, 'index']);
+    Route::post('/employees/{employee}/trainings',                   [TrainingController::class, 'store']);
+    Route::put('/employees/{employee}/trainings/{training}',         [TrainingController::class, 'update']);
+    Route::delete('/employees/{employee}/trainings/{training}',      [TrainingController::class, 'destroy']);
+
+    // Messages
+    Route::get('/messages/conversations',    [MessageController::class, 'conversations']);
+    Route::get('/messages/unread',           [MessageController::class, 'unreadCount']);
+    Route::get('/messages/{user}',           [MessageController::class, 'thread']);
+    Route::post('/messages/{user}',          [MessageController::class, 'send']);
 
     Route::get('/departments',             [DepartmentController::class, 'index']);
     Route::post('/departments',            [DepartmentController::class, 'store']);

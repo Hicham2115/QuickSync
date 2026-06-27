@@ -28,6 +28,7 @@ interface EmployeeForm {
   hired: string;
   status: "Actif" | "En congé" | "Inactif";
   leaves: number;
+  salary: number | "";
 }
 
 const EMPTY: EmployeeForm = {
@@ -38,6 +39,7 @@ const EMPTY: EmployeeForm = {
   hired: "",
   status: "Actif",
   leaves: 0,
+  salary: "",
 };
 
 export function AddEmployeeModal({ open, onClose }: Props) {
@@ -207,6 +209,23 @@ export function AddEmployeeModal({ open, onClose }: Props) {
               </Field>
               <Field label="Jours de congés">
                 <NumInput value={form.leaves} onChange={(v) => set("leaves", v)} />
+              </Field>
+            </div>
+
+            {/* Row 4: Salary */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Field label="Salaire (MAD)">
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-400 text-sm pointer-events-none">MAD</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.salary}
+                    onChange={(e) => set("salary", e.target.value === "" ? "" : Number(e.target.value))}
+                    placeholder="0.00"
+                    className={`${inputCls(false)} pl-12`}
+                  />
+                </div>
               </Field>
             </div>
           </div>

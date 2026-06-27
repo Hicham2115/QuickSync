@@ -15,6 +15,8 @@ import {
   UserRound,
   FileText,
   Megaphone,
+  GraduationCap,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -46,6 +48,8 @@ const ALL_NAV_GROUPS: NavGroup[] = [
       { icon: Building2,       label: "Départements",    href: "/dashboard/departements", roles: ["admin", "rh"] },
       { icon: Megaphone,       label: "Annonces",        href: "/dashboard/annonces",     roles: ["admin", "rh", "employee"] },
       { icon: FileText,        label: "Documents",       href: "/dashboard/documents",    roles: ["admin", "rh", "employee"] },
+      { icon: GraduationCap,  label: "Formations",      href: "/dashboard/formations",   roles: ["admin", "rh"] },
+      { icon: MessageSquare,  label: "Messagerie",      href: "/dashboard/messages",     roles: ["admin", "rh", "employee"] },
     ],
   },
   {
