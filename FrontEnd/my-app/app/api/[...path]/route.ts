@@ -14,6 +14,7 @@ async function proxy(req: NextRequest) {
   req.headers.forEach((v, k) => {
     if (!["host", "connection", "accept-encoding"].includes(k)) headers.set(k, v);
   });
+  console.log(`[proxy] auth header: ${headers.get("authorization") ?? "MISSING"}`);
 
   const body =
     req.method !== "GET" && req.method !== "HEAD"
