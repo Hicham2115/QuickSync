@@ -196,7 +196,7 @@ export function Chat() {
                       borderLeft: contactId === c.contact_id ? "3px solid #6366F1" : "3px solid transparent",
                     }}
                   >
-                    <EmpAvatar name={c.contact_name} avatar={c.contact_avatar} size={36} />
+                    <EmpAvatar name={c.contact_name} size={36} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-sans text-[13px] font-semibold text-ink-900 truncate">{c.contact_name}</span>
