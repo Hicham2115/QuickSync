@@ -23,7 +23,11 @@ class RegisterController extends Controller
             'role'         => 'admin',
         ]);
 
-        $user->sendEmailVerificationNotification();
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Verification email failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'message' => 'Account created. Please check your email to verify your account.',
