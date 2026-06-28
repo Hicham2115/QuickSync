@@ -37,17 +37,21 @@ export function SignInForm({ onSwitch , ResetPassword}: { onSwitch: () => void; 
 
   const loginMutation = useMutation({
     mutationFn: async (values: { email: string; password: string }) => {
+      console.log("[login] sending request...");
       const res = await api.post("/api/login", values);
+      console.log("[login] raw response:", res.status, res.data);
       return res.data;
     },
 
     onSuccess: (data) => {
+      console.log("[login] onSuccess:", data);
       localStorage.setItem("auth_token", data.token);
       toast.success(`Bon retour, ${data.user.CompleteName} !`);
       router.push("/dashboard");
     },
 
     onError: (error) => {
+      console.error("[login] onError:", error);
       const message = axios.isAxiosError(error)
         ? (error.response?.data?.message ?? "Invalid credentials.")
         : "Failed to sign in.";
