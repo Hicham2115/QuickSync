@@ -35,7 +35,7 @@ services:
           type: web
           property: host
       - key: DB_CONNECTION
-        value: mysql
+        value: pgsql
       - key: DB_HOST
         fromDatabase:
           name: quicksync-db
