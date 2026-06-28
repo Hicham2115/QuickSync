@@ -31,9 +31,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     api
       .get("/api/user", { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
+        console.log("[AuthGuard] /api/user response:", res.data);
         const role: UserRole = res.data.role ?? "employee";
 
         if (!ALLOWED_ROLES.includes(role)) {
+          console.log("[AuthGuard] role not allowed:", role);
           router.replace("/");
           return;
         }
@@ -55,7 +57,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
         setAuthorized(true);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("[AuthGuard] /api/user failed:", err?.message, err?.response?.status, err?.response?.data);
         localStorage.removeItem("auth_token");
         router.replace("/");
       });
