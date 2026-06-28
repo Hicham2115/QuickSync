@@ -12,7 +12,7 @@ async function proxy(req: NextRequest) {
 
   const headers = new Headers();
   req.headers.forEach((v, k) => {
-    if (!["host", "connection"].includes(k)) headers.set(k, v);
+    if (!["host", "connection", "accept-encoding"].includes(k)) headers.set(k, v);
   });
 
   const body =
@@ -31,7 +31,7 @@ async function proxy(req: NextRequest) {
 
     const resHeaders = new Headers();
     res.headers.forEach((v, k) => {
-      if (k !== "transfer-encoding") resHeaders.set(k, v);
+      if (!["transfer-encoding", "content-encoding"].includes(k)) resHeaders.set(k, v);
     });
 
     return new NextResponse(res.body, {
