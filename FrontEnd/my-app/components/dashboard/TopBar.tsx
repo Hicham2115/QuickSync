@@ -103,6 +103,7 @@ export function TopBar() {
     },
     onSuccess: () => {
       localStorage.removeItem("auth_token");
+      queryClient.clear();
       toast.success("Vous avez été déconnecté.");
       router.push("/");
     },

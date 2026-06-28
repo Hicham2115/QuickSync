@@ -19,7 +19,7 @@ import {
   MessageSquare,
   type LucideIcon,
 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import axios from "axios";
@@ -70,6 +70,7 @@ const ROLE_LABEL: Record<UserRole, string> = {
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const user = useAuthStore((s) => s.user);
   const role = user?.role ?? "rh";
@@ -89,6 +90,7 @@ export function Sidebar() {
     },
     onSuccess: () => {
       localStorage.removeItem("auth_token");
+      queryClient.clear();
       toast.success("Vous avez été déconnecté.");
       router.push("/");
     },

@@ -17,17 +17,12 @@ class RegisterController extends Controller
         ]);
 
         $user = User::create([
-            'CompleteName' => $validatedData['CompleteName'],
-            'email'        => $validatedData['email'],
-            'password'     => $validatedData['password'],
-            'role'         => 'admin',
+            'CompleteName'      => $validatedData['CompleteName'],
+            'email'             => $validatedData['email'],
+            'password'          => $validatedData['password'],
+            'role'              => 'admin',
+            'email_verified_at' => now(),
         ]);
-
-        try {
-            $user->sendEmailVerificationNotification();
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Verification email failed: ' . $e->getMessage());
-        }
 
         return response()->json([
             'message' => 'Account created. Please check your email to verify your account.',
