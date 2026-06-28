@@ -9,7 +9,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Wake the backend on page load (direct call bypasses proxy timeout limits)
     fetch("/api/health").catch(() => {});
-  }, []);
+  }, []);   
 
   const [queryClient] = useState(
     () =>
