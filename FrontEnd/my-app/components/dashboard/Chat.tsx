@@ -227,7 +227,7 @@ export function Chat() {
                           borderLeft: contactId === u.id ? "3px solid #6366F1" : "3px solid transparent",
                         }}
                       >
-                        <EmpAvatar name={u.name} avatar={u.avatar} size={36} />
+                        <EmpAvatar name={u.name} size={36} />
                         <div className="flex-1 min-w-0">
                           <span className="font-sans text-[13px] font-medium text-ink-900">{u.name}</span>
                           <p className="font-sans text-[11px] text-warm-400 mt-0.5 capitalize">{u.role}</p>
@@ -260,7 +260,7 @@ export function Chat() {
               {/* Contact header */}
               <div className="px-6 py-4 flex items-center gap-3 shrink-0" style={{ borderBottom: "1px solid #DEDED8", background: "#FAFAFA" }}>
                 {activeContact && (
-                  <EmpAvatar name={activeContact.contact_name} avatar={activeContact.contact_avatar} size={36} />
+                  <EmpAvatar name={activeContact.contact_name} size={36} />
                 )}
                 <div>
                   <p className="font-sans text-[14px] font-semibold text-ink-900">{activeContact?.contact_name}</p>
