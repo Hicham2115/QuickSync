@@ -7,8 +7,8 @@ import { api } from "@/lib/axios";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Wake the backend on page load so it's ready when the user submits a form
-    api.get("/api/health").catch(() => {});
+    // Wake the backend on page load (direct call bypasses proxy timeout limits)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/health`).catch(() => {});
   }, []);
 
   const [queryClient] = useState(

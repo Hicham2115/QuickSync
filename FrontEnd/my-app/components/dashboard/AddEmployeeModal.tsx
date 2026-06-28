@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import axios from "axios";
-import { X, UserPlus } from "lucide-react";
+import { X, UserPlus, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ const EMPTY: EmployeeForm = {
 
 export function AddEmployeeModal({ open, onClose }: Props) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [form, setForm] = useState<EmployeeForm>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof EmployeeForm, string>>>({});
 
@@ -175,6 +177,16 @@ export function AddEmployeeModal({ open, onClose }: Props) {
                   options={deptOptions}
                   error={!!errors.dept}
                 />
+                {departments.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { onClose(); router.push("/dashboard/departements"); }}
+                    className="mt-1.5 flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 transition-colors"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Aucun département — en créer un
+                  </button>
+                )}
               </Field>
               <Field label="Poste" error={errors.title} required>
                 <input
