@@ -93,6 +93,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/leaves/{leave}',  [LeaveController::class, 'destroy']);
 });
 
+Route::get('/health', fn () => response()->json(['status' => 'ok']));
+
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('/signup',          [RegisterController::class, 'signup']);
     Route::post('/login',           [LoginController::class,   'login']);
