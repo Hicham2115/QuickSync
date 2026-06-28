@@ -88,15 +88,6 @@ services:
     dockerContext: ./FrontEnd/my-app
     plan: free
     region: oregon
-    dockerBuildArgs:
-      - key: NEXT_PUBLIC_API_URL
-        fromService:
-          name: quicksync-backend
-          type: web
-          property: host
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          name: quicksync-backend
-          type: web
-          property: host
+        sync: false  # set manually after backend deploys — must be a build env var too
