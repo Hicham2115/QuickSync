@@ -30,12 +30,29 @@ async function proxy(req: NextRequest) {
 
     console.log(`[proxy] response status=${res.status}`);
 
+    // Buffer the full response body so we don't stream a ReadableStream whose
+    // content-length may reference the compressed size (before Node fetch
+    // auto-decompresses gzip).  Streaming + wrong content-length causes the
+    // browser to truncate the body, leaving axios with a raw string instead of
+    // a parsed JSON object.
+    const responseBody = await res.arrayBuffer();
+
     const resHeaders = new Headers();
     res.headers.forEach((v, k) => {
-      if (!["transfer-encoding", "content-encoding"].includes(k)) resHeaders.set(k, v);
+      // Strip hop-by-hop and encoding headers; also strip content-length
+      // because the buffered (decompressed) body size may differ from the
+      // original compressed length.
+      if (!["transfer-encoding", "content-encoding", "content-length"].includes(k)) {
+        resHeaders.set(k, v);
+      }
     });
 
-    return new NextResponse(res.body, {
+    // Guarantee content-type so axios always parses JSON correctly.
+    if (!resHeaders.has("content-type")) {
+      resHeaders.set("content-type", "application/json");
+    }
+
+    return new NextResponse(responseBody, {
       status: res.status,
       headers: resHeaders,
     });

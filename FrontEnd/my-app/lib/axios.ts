@@ -22,9 +22,14 @@ api.interceptors.response.use(
     if (!config) return Promise.reject(error);
 
     const status = error.response?.status;
+    const method = config.method?.toUpperCase();
 
-    // If any authenticated request returns 401 (token revoked/expired), log out
-    if (status === 401 && typeof window !== "undefined" && window.location.pathname.startsWith("/dashboard")) {
+    // Only force-logout on 401 from write requests (mutations).  GET requests
+    // (background fetches, /api/user health check) may legitimately fail during
+    // a cold start or while the session is being established — redirecting on
+    // those would cause an infinite login → dashboard → login loop.
+    const isMutation = method && ["POST", "PUT", "PATCH", "DELETE"].includes(method);
+    if (status === 401 && isMutation && typeof window !== "undefined" && window.location.pathname.startsWith("/dashboard")) {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
       window.location.href = "/";

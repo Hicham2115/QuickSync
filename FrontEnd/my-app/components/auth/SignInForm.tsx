@@ -44,6 +44,11 @@ export function SignInForm({ onSwitch , ResetPassword}: { onSwitch: () => void; 
     },
 
     onSuccess: (data) => {
+      console.log("[login] onSuccess data:", JSON.stringify(data));
+      if (!data?.token) {
+        toast.error("Réponse inattendue du serveur. Réessayez.");
+        return;
+      }
       localStorage.setItem("auth_token", data.token);
       if (data.user) localStorage.setItem("auth_user", JSON.stringify(data.user));
       toast.success(`Bon retour, ${data.user?.CompleteName ?? "!"}`);
