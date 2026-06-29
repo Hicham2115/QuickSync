@@ -24,37 +24,34 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem("auth_token");
     if (!token) { router.replace("/"); return; }
 
-    // Use cached user to show dashboard immediately (avoids cold-start blank screen)
+    // Restore user from cache so sidebar/topbar show name immediately
     const cached = localStorage.getItem("auth_user");
     if (cached) {
       try {
         const u = JSON.parse(cached);
         const role: UserRole = u.role ?? "employee";
-        if (ALLOWED_ROLES.includes(role)) {
-          const restricted = Object.entries(RESTRICTED_PATHS).find(([p]) => pathname.startsWith(p));
-          if (restricted && !restricted[1].includes(role)) {
-            router.replace("/dashboard");
-            return;
-          }
-          setUser({ id: u.id, name: u.CompleteName ?? u.name ?? "", email: u.email, role });
-          setAuthorized(true);
-        }
-      } catch { /* ignore bad cache */ }
+        setUser({ id: u.id, name: u.CompleteName ?? u.name ?? "", email: u.email, role });
+      } catch { /* ignore */ }
     }
 
-    // Background token validation — logs out if token is truly invalid (not just slow)
+    // Token exists → show dashboard optimistically (cold-start can take 30–50s)
+    setAuthorized(true);
+
+    // Validate token in background; only redirect on explicit 401/403
     api
       .get("/api/user", { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         const role: UserRole = res.data.role ?? "employee";
-        if (!ALLOWED_ROLES.includes(role)) { router.replace("/"); return; }
         localStorage.setItem("auth_user", JSON.stringify(res.data));
         setUser({ id: res.data.id, name: res.data.CompleteName ?? res.data.name ?? "", email: res.data.email, role });
-        setAuthorized(true);
+
+        const restricted = Object.entries(RESTRICTED_PATHS).find(([p]) => pathname.startsWith(p));
+        if (!ALLOWED_ROLES.includes(role) || (restricted && !restricted[1].includes(role))) {
+          router.replace("/dashboard");
+        }
       })
       .catch((err) => {
         const status = err?.response?.status;
-        // Only force logout on explicit auth rejection — not on timeouts/network errors
         if (status === 401 || status === 403) {
           localStorage.removeItem("auth_token");
           localStorage.removeItem("auth_user");
