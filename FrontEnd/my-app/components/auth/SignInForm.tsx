@@ -44,8 +44,8 @@ export function SignInForm({ onSwitch , ResetPassword}: { onSwitch: () => void; 
     },
 
     onSuccess: (data) => {
-      console.log("[login] onSuccess:", data);
       localStorage.setItem("auth_token", data.token);
+      if (data.user) localStorage.setItem("auth_user", JSON.stringify(data.user));
       toast.success(`Bon retour, ${data.user?.CompleteName ?? "!"}`);
       router.push("/dashboard");
     },

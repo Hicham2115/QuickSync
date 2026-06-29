@@ -22,49 +22,47 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
+    if (!token) { router.replace("/"); return; }
 
-    if (!token) {
-      router.replace("/");
-      return;
+    // Use cached user to show dashboard immediately (avoids cold-start blank screen)
+    const cached = localStorage.getItem("auth_user");
+    if (cached) {
+      try {
+        const u = JSON.parse(cached);
+        const role: UserRole = u.role ?? "employee";
+        if (ALLOWED_ROLES.includes(role)) {
+          const restricted = Object.entries(RESTRICTED_PATHS).find(([p]) => pathname.startsWith(p));
+          if (restricted && !restricted[1].includes(role)) {
+            router.replace("/dashboard");
+            return;
+          }
+          setUser({ id: u.id, name: u.CompleteName ?? u.name ?? "", email: u.email, role });
+          setAuthorized(true);
+        }
+      } catch { /* ignore bad cache */ }
     }
 
+    // Background token validation — logs out if token is truly invalid (not just slow)
     api
       .get("/api/user", { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
-        console.log("[AuthGuard] /api/user response:", res.data);
         const role: UserRole = res.data.role ?? "employee";
-
-        if (!ALLOWED_ROLES.includes(role)) {
-          console.log("[AuthGuard] role not allowed:", role);
-          router.replace("/");
-          return;
-        }
-
-        const restricted = Object.entries(RESTRICTED_PATHS).find(([path]) =>
-          pathname.startsWith(path)
-        );
-        if (restricted && !restricted[1].includes(role)) {
-          router.replace("/dashboard");
-          return;
-        }
-
-        setUser({
-          id: res.data.id,
-          name: res.data.CompleteName ?? res.data.name ?? "",
-          email: res.data.email,
-          role,
-        });
-
+        if (!ALLOWED_ROLES.includes(role)) { router.replace("/"); return; }
+        localStorage.setItem("auth_user", JSON.stringify(res.data));
+        setUser({ id: res.data.id, name: res.data.CompleteName ?? res.data.name ?? "", email: res.data.email, role });
         setAuthorized(true);
       })
       .catch((err) => {
-        console.error("[AuthGuard] /api/user failed:", err?.message, err?.response?.status, err?.response?.data);
-        localStorage.removeItem("auth_token");
-        router.replace("/");
+        const status = err?.response?.status;
+        // Only force logout on explicit auth rejection — not on timeouts/network errors
+        if (status === 401 || status === 403) {
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("auth_user");
+          router.replace("/");
+        }
       });
-  }, [router, pathname, setUser]);
+  }, []);
 
   if (!authorized) return null;
-
   return <>{children}</>;
 }
