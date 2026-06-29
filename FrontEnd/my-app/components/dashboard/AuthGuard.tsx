@@ -50,13 +50,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           router.replace("/dashboard");
         }
       })
-      .catch((err) => {
-        const status = err?.response?.status;
-        if (status === 401 || status === 403) {
-          localStorage.removeItem("auth_token");
-          localStorage.removeItem("auth_user");
-          router.replace("/");
-        }
+      .catch(() => {
+        // Background check failed — keep user in dashboard.
+        // Individual API calls will handle auth errors if token is truly invalid.
       });
   }, []);
 

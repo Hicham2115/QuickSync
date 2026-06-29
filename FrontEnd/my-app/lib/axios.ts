@@ -15,16 +15,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Retry only GET requests on network errors (POST/PUT/DELETE are not retried — not idempotent)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config;
     if (!config) return Promise.reject(error);
 
+    const status = error.response?.status;
+
+    // If any authenticated request returns 401 (token revoked/expired), log out
+    if (status === 401 && typeof window !== "undefined" && window.location.pathname.startsWith("/dashboard")) {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
+      window.location.href = "/";
+      return Promise.reject(error);
+    }
+
+    // Retry only GET requests on network errors (not idempotent methods)
     const isNetworkError = !error.response;
     const isSafeMethod = config.method?.toUpperCase() === "GET";
-
     config._retryCount = config._retryCount ?? 0;
 
     if (isNetworkError && isSafeMethod && config._retryCount < 3) {
